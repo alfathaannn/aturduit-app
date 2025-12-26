@@ -187,7 +187,7 @@ in the Software without restriction...
 
 **Alfathan**
 - Instagram: [@alfathaannn](https://www.instagram.com/alfathaannn)
-- GitHub: [@alfathaannn](https://github.com/fathaan)
+- GitHub: [@alfathaannn](https://github.com/alfathaannn)
 
 ---
 
