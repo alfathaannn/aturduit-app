@@ -46,9 +46,6 @@
                     <span>MoneyTrack</span>
                 </div>
                 <div class="navbar-actions">
-                    <button class="btn-icon" id="syncBtn" title="Sync ke Cloud">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
                     <button class="btn-icon" id="settingsBtn" title="Pengaturan">
                         <i class="fas fa-cog"></i>
                     </button>
@@ -60,25 +57,42 @@
         <main class="main-content">
             <!-- Dashboard View -->
             <div id="dashboardView" class="view active">
-                <!-- Balance Card -->
-                <div class="balance-card">
-                    <div class="balance-label">Total Saldo</div>
-                    <div class="balance-amount" id="totalBalance">Rp 0</div>
-                    <div class="balance-details">
-                        <div class="balance-item">
-                            <div class="balance-item-label">
-                                <i class="fas fa-arrow-down text-success"></i>
-                                Pemasukan
-                            </div>
-                            <div class="balance-item-value text-success" id="totalIncome">Rp 0</div>
+                <!-- Balance Cards -->
+                <div class="balance-cards-container">
+                    <!-- Total Saldo Card -->
+                    <div class="balance-card balance-card-saldo">
+                        <div class="balance-label">
+                            <i class="fas fa-wallet"></i>
+                            Total Saldo
                         </div>
-                        <div class="balance-item">
-                            <div class="balance-item-label">
-                                <i class="fas fa-arrow-up text-danger"></i>
-                                Pengeluaran
-                            </div>
-                            <div class="balance-item-value text-danger" id="totalExpense">Rp 0</div>
+                        <div class="balance-amount" id="totalSaldo">Rp 0</div>
+                    </div>
+
+                    <!-- Total Cash Card -->
+                    <div class="balance-card balance-card-cash">
+                        <div class="balance-label">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Total Cash
                         </div>
+                        <div class="balance-amount" id="totalCash">Rp 0</div>
+                    </div>
+                </div>
+
+                <!-- Income & Expense Summary -->
+                <div class="summary-card">
+                    <div class="summary-item">
+                        <div class="summary-item-label">
+                            <i class="fas fa-arrow-down text-success"></i>
+                            Pemasukan
+                        </div>
+                        <div class="summary-item-value text-success" id="totalIncome">Rp 0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-item-label">
+                            <i class="fas fa-arrow-up text-danger"></i>
+                            Pengeluaran
+                        </div>
+                        <div class="summary-item-value text-danger" id="totalExpense">Rp 0</div>
                     </div>
                 </div>
 
@@ -111,6 +125,7 @@
             </div>
 
             <!-- Transactions View -->
+            <!-- Ganti bagian filter section di transactionsView dengan ini: -->
             <div id="transactionsView" class="view">
                 <div class="view-header">
                     <button class="btn-back" id="backToHome">
@@ -119,17 +134,74 @@
                     <h4>Semua Transaksi</h4>
                 </div>
 
-                <div class="filter-section">
-                    <select class="form-select" id="filterType">
-                        <option value="all">Semua Transaksi</option>
-                        <option value="income">Pemasukan</option>
-                        <option value="expense">Pengeluaran</option>
-                    </select>
-                    <select class="form-select" id="filterMonth">
-                        <option value="all">Semua Bulan</option>
-                    </select>
-                </div>
+                <!-- Filter Header -->
+                <div class="filter-header">
+                    <div class="filter-toggle" id="filterToggle">
+                        <i class="fas fa-filter"></i>
+                        <span>Filter</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <!-- Filter Panel (Awalnya tersembunyi) -->
+                    <div class="filter-panel" id="filterPanel">
+                        <div class="filter-group">
+                            <div class="filter-label">
+                                <i class="fas fa-exchange-alt"></i>
+                                Tipe Transaksi
+                            </div>
+                            <div class="filter-options">
+                                <button class="filter-chip active" data-filter="type" data-value="all">
+                                    Semua
+                                </button>
+                                <button class="filter-chip" data-filter="type" data-value="income">
+                                    <i class="fas fa-arrow-down text-success"></i>
+                                    Pemasukan
+                                </button>
+                                <button class="filter-chip" data-filter="type" data-value="expense">
+                                    <i class="fas fa-arrow-up text-danger"></i>
+                                    Pengeluaran
+                                </button>
+                            </div>
+                        </div>
 
+                        <div class="filter-group">
+                            <div class="filter-label">
+                                <i class="fas fa-tags"></i>
+                                Kategori
+                            </div>
+                            <div class="filter-options" id="filterCategoryOptions">
+                                <button class="filter-chip active" data-filter="category" data-value="all">
+                                    Semua
+                                </button>
+                                <!-- Kategori akan diisi secara dinamis oleh JavaScript -->
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <div class="filter-label">
+                                <i class="fas fa-calendar"></i>
+                                Periode
+                            </div>
+                            <div class="filter-options" id="filterMonthOptions">
+                                <button class="filter-chip active" data-filter="month" data-value="all">
+                                    Semua Bulan
+                                </button>
+                                <!-- Bulan akan diisi secara dinamis oleh JavaScript -->
+                            </div>
+                        </div>
+
+                        <div class="filter-actions">
+                            <button class="btn-filter-secondary" id="clearFilters">
+                                <i class="fas fa-times"></i>
+                                Reset Filter
+                            </button>
+                            <button class="btn-filter-primary" id="applyFilters">
+                                <i class="fas fa-check"></i>
+                                Terapkan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="active-filters" id="activeFilters"></div>
                 <div id="allTransactions" class="transaction-list"></div>
             </div>
 
@@ -172,8 +244,8 @@
                         </div>
                     </div>
                     <div class="report-card">
-                        <div class="report-card-icon text-primary">
-                            <i class="fas fa-wallet"></i>
+                        <div class="report-card-icon text-info">
+                            <i class="fas fa-balance-scale"></i>
                         </div>
                         <div class="report-card-content">
                             <div class="report-card-label">Selisih</div>
@@ -183,7 +255,7 @@
                 </div>
 
                 <div class="section">
-                    <h5>Transaksi Bulan Ini</h5>
+                    <h5 class="section-title">Transaksi Bulan Ini</h5>
                     <div id="monthTransactions" class="transaction-list"></div>
                 </div>
             </div>
@@ -197,7 +269,9 @@
                     <h4>Pengaturan</h4>
                 </div>
 
-                <div class="settings-list">
+                <div class="settings-section">
+                    <h6 class="settings-section-title">Tampilan</h6>
+                    
                     <div class="settings-item">
                         <div class="settings-item-content">
                             <i class="fas fa-moon"></i>
@@ -211,27 +285,17 @@
                             <span class="slider"></span>
                         </label>
                     </div>
+                </div>
 
-                    <div class="settings-item">
-                        <div class="settings-item-content">
-                            <i class="fas fa-cloud"></i>
-                            <div>
-                                <div class="settings-item-title">Sinkronisasi Cloud</div>
-                                <div class="settings-item-desc">Backup otomatis ke cloud</div>
-                            </div>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="cloudSyncToggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-
+                <div class="settings-section">
+                    <h6 class="settings-section-title">Data & Backup</h6>
+                    
                     <div class="settings-item" id="exportDataBtn">
                         <div class="settings-item-content">
                             <i class="fas fa-download"></i>
                             <div>
                                 <div class="settings-item-title">Export Data</div>
-                                <div class="settings-item-desc">Download data sebagai JSON</div>
+                                <div class="settings-item-desc">Backup data ke file JSON</div>
                             </div>
                         </div>
                         <i class="fas fa-chevron-right"></i>
@@ -262,7 +326,7 @@
 
                 <div class="settings-footer">
                     <p>MoneyTrack v1.0</p>
-                    <p>© 2024 MoneyTrack. All rights reserved.</p>
+                    <p>© 2025 MoneyTrack by <a href="https://www.instagram.com/alfathaannn" style="text-decoration: none;">alfathaannn</a>. All rights reserved.</p>
                 </div>
             </div>
         </main>
@@ -313,7 +377,9 @@
 
                         <div class="mb-3">
                             <label class="form-label">Kategori</label>
-                            <input type="text" class="form-control" id="transactionCategory" required>
+                            <select class="form-control" id="transactionCategory" required>
+                                <option value="">Pilih Kategori</option>
+                            </select>
                         </div>
 
                         <div class="mb-3">
@@ -393,11 +459,6 @@
         </div>
     </div>
 
-    <!-- Add before closing </head> -->
-    <script src="config.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="cloud-sync.js"></script>
-
     <!-- Import File Input -->
     <input type="file" id="importFileInput" accept=".json" style="display: none;">
 
@@ -406,7 +467,5 @@
     
     <!-- Custom JS -->
     <script src="app.js"></script>
-
-    
 </body>
 </html>
