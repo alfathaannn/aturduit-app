@@ -258,12 +258,23 @@ Jika menemui masalah atau punya saran:
 3. Export data sebagai backup
 4. Clear cache dan coba lagi
 
+Jika Anda menyukai project ini, berikan ⭐ di GitHub!
+
+Untuk pertanyaan atau support, hubungi:
+- Email: muhammadalfathan0433@gmail.com
+- Instagram DM: [@alfathaannn](https://www.instagram.com/alfathaannn)
+
 ## 📜 License
 
 MIT License - Feel free to use and modify!
 
 ---
 
-**Dibuat dengan ❤️ menggunakan teknologi modern untuk pengelolaan keuangan yang lebih baik**
 
-*Happy Managing Your Finances! 💰*
+<div align="center">
+  
+  **Made with ❤️ by alfathaannn**
+  
+  ⭐ Jangan lupa star repository ini jika bermanfaat! ⭐
+  
+</div>
