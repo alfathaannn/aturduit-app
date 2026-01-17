@@ -1,219 +1,269 @@
-# 💰 MoneyTrack V1.0
+# Aturduit - Aplikasi Manajemen Keuangan Premium
 
-<div align="center">
-  
-  ![MoneyTrack Banner](https://img.shields.io/badge/MoneyTrack-V1.0-4CAF50?style=for-the-badge&logo=wallet&logoColor=white)
-  ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
-  ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
-  
-  **Aplikasi Web Manajemen Keuangan Pribadi yang Simpel & Powerful**
-  
-  [Demo](#-demo) • [Fitur](#-fitur-utama) • [Instalasi](#-instalasi) • [Penggunaan](#-cara-penggunaan) • [Kontribusi](#-kontribusi)
-  
-</div>
+![Version](https://img.shields.io/badge/version-2.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
----
+Aplikasi manajemen keuangan pribadi dengan tampilan modern, elegan, dan fitur lengkap untuk mengatur pemasukan, pengeluaran, dan alokasi dana.
 
-## 📖 Tentang MoneyTrack
+## 🌟 Fitur Utama
 
-**MoneyTrack** adalah aplikasi web manajemen keuangan pribadi yang dirancang untuk membantu Anda melacak pemasukan dan pengeluaran dengan mudah dan efisien. Dengan antarmuka yang modern dan intuitif, MoneyTrack memungkinkan Anda untuk:
+### 💰 Manajemen Saldo
+- **Saldo Utama**: Saldo utama otomatis dihitung dari total pemasukan dikurangi alokasi ke kantong dan pengeluaran dari saldo utama
+- **Multi Kantong**: Pisahkan dana untuk berbagai kebutuhan (makan, kosan, tabungan, dll)
+- **Tracking Real-time**: Semua perubahan langsung tersimpan dan terupdate
 
-- ✅ Mencatat transaksi keuangan harian
-- 📊 Memantau saldo dan cash flow secara real-time
-- 📈 Menganalisis pola pengeluaran dengan visualisasi data
-- 💾 Menyimpan data secara lokal di browser (LocalStorage)
-- 📱 Digunakan di berbagai perangkat (Responsive Design)
+### 📊 Transaksi
+- **Pemasukan**: Catat semua pendapatan yang otomatis masuk ke saldo utama
+- **Pengeluaran**: Pilih sumber dana (saldo utama atau kantong tertentu) saat mencatat pengeluaran
+- **Filter Canggih**: Filter berdasarkan tipe dan periode waktu
+- **History Lengkap**: Lihat semua transaksi dengan detail tanggal dan sumber dana
 
-> **"Kendalikan Keuangan Anda, Raih Masa Depan yang Lebih Baik"**
+### 🎯 Kantong Dana (Pockets)
+- **Alokasi Fleksibel**: Pindahkan dana dari saldo utama ke kantong
+- **Target Tabungan**: Tetapkan target untuk setiap kantong
+- **Progress Tracking**: Visual progress bar untuk melihat pencapaian
+- **Custom Icon**: Personalisasi dengan emoji atau icon favorit
 
----
+### 📈 Statistik & Analisis
+- **Dashboard Real-time**: Ringkasan keuangan dalam satu layar
+- **Grafik 7 Hari**: Visualisasi pemasukan vs pengeluaran
+- **Distribusi Kantong**: Lihat alokasi dana di semua kantong
+- **Summary Cards**: Total pemasukan, pengeluaran, dan saldo
 
-## ✨ Fitur Utama
+## 🎨 Desain & Teknologi
 
-### 💵 Manajemen Transaksi
-- **Tambah Pemasukan & Pengeluaran** dengan form yang lengkap
-- **Kategorisasi Otomatis** untuk pemasukan dan pengeluaran
-- **Metode Pembayaran** - Pilih antara Cash atau Saldo
-- **Upload Bukti Transaksi** - Simpan foto resi/struk untuk dokumentasi
-- **Catatan Transaksi** - Tambahkan notes pada setiap transaksi
+### Visual Design
+- **Classic Elegance Color Palette**:
+  - `#D4D8DD` - Silver Light
+  - `#AAB7B7` - Silver Medium
+  - `#C0C8CA` - Silver Dark
+  - `#2E4156` - Navy Medium
+  - `#1A2D42` - Navy Dark
 
-### 📊 Dashboard Interaktif
-- **Total Saldo** - Lihat saldo keseluruhan secara real-time
-- **Total Cash** - Monitor uang cash yang tersedia
-- **Ringkasan Pemasukan & Pengeluaran** - Summary keuangan bulanan
-- **Riwayat Transaksi Terbaru** - Akses cepat ke transaksi terakhir
+### UI/UX Features
+- ✨ **Glassmorphism Effect**: Kartu transparan dengan blur effect
+- 🌓 **Dark/Light Mode**: Tema yang dapat disesuaikan dengan preferensi
+- 🎬 **Smooth Transitions**: Animasi halus seperti aplikasi Apple
+- 🌊 **Vanta.js Background**: Background animasi 3D yang interaktif
+- 📱 **Responsive Design**: Optimal di semua ukuran layar
 
-### 🔍 Filtering & Pencarian
-- **Filter Berdasarkan Tipe** - Pemasukan, Pengeluaran, atau Semua
-- **Filter Kategori** - Makanan, Transport, Gaji, Investasi, dll.
-- **Filter Periode Waktu** - Harian, Mingguan, Bulanan, atau Custom
-- **Pencarian Transaksi** - Cari transaksi berdasarkan judul atau notes
+### Technology Stack
+- **Frontend**: Vanilla JavaScript (No Framework)
+- **Styling**: Pure CSS dengan CSS Variables
+- **Icons**: Material Icons Round (Google)
+- **Fonts**: Google Sans (CDN)
+- **Modals**: SweetAlert2
+- **Background**: Vanta.js with Three.js
+- **Storage**: LocalStorage (Browser)
 
-### 📈 Laporan & Analisis
-- **Grafik Pie Chart** - Visualisasi distribusi pengeluaran per kategori
-- **Grafik Line Chart** - Trend pemasukan vs pengeluaran
-- **Top Pengeluaran** - Daftar kategori dengan pengeluaran terbesar
-- **Monthly Comparison** - Perbandingan keuangan antar bulan
+## 🚀 Cara Penggunaan
 
-### ⚙️ Pengaturan & Data Management
-- **Export Data** - Backup data ke file JSON
-- **Import Data** - Restore data dari backup
-- **Clear Data** - Hapus semua data transaksi
-- **Dark Mode** (Coming Soon)
+### Instalasi
+1. Download semua file (`index.html`, `styles.css`, `app.js`)
+2. Buka `index.html` di browser modern (Chrome, Firefox, Safari, Edge)
+3. Aplikasi siap digunakan!
 
----
+### Navigasi
+Aplikasi memiliki 4 halaman utama:
+- 🏠 **Dashboard**: Ringkasan dan quick actions
+- 📝 **Transaksi**: Daftar lengkap semua transaksi
+- 💼 **Kantong**: Kelola kantong dana
+- 📊 **Statistik**: Analisis dan visualisasi data
 
-## PREVIEW LINK : https://mymoneytrack-alfathaannn.vercel.app/
+### Workflow Pemasukan
+1. Klik "Tambah Pemasukan" di Dashboard atau halaman Transaksi
+2. Isi deskripsi (contoh: "Gaji Bulanan")
+3. Masukkan jumlah
+4. Pilih tanggal
+5. Klik "Simpan"
+6. ✅ Uang otomatis masuk ke **Saldo Utama**
 
----
+### Workflow Pengeluaran
+1. Klik "Tambah Pengeluaran"
+2. Isi deskripsi (contoh: "Makan Siang")
+3. Masukkan jumlah
+4. **Pilih Sumber Dana**:
+   - Saldo Utama
+   - Atau salah satu Kantong yang tersedia
+5. Pilih tanggal
+6. Klik "Simpan"
+7. ✅ Uang otomatis dikurangi dari sumber yang dipilih
 
-## 📱 Cara Penggunaan
+### Workflow Kantong
+1. Buka halaman "Kantong" atau klik "Kelola Kantong" di Dashboard
+2. Klik "Tambah Kantong"
+3. Isi informasi:
+   - **Nama**: Misalnya "Uang Makan"
+   - **Icon**: Emoji seperti 🍔
+   - **Alokasi Dana**: Jumlah yang ingin dipindahkan dari Saldo Utama
+   - **Target** (opsional): Target tabungan
+4. Klik "Simpan"
+5. ✅ Dana dipindahkan dari Saldo Utama ke Kantong
 
-### 1️⃣ Tambah Transaksi Baru
-
-1. Klik tombol **"+ Tambah Pemasukan"** atau **"- Tambah Pengeluaran"**
-2. Isi form transaksi:
-   - **Judul**: Nama transaksi (contoh: "Gaji Bulanan")
-   - **Jumlah**: Nominal dalam Rupiah
-   - **Kategori**: Pilih kategori yang sesuai
-   - **Metode**: Cash atau Saldo
-   - **Tanggal**: Tanggal transaksi
-   - **Catatan**: Keterangan tambahan (opsional)
-   - **Bukti**: Upload foto resi (opsional)
-3. Klik **"Simpan"**
-
-### 2️⃣ Lihat & Filter Transaksi
-
-1. Buka menu **"Transaksi"** di bottom navigation
-2. Gunakan **Filter** untuk menyaring data:
-   - Tipe: Semua / Pemasukan / Pengeluaran
-   - Kategori: Pilih kategori spesifik
-   - Periode: Hari Ini / Minggu Ini / Bulan Ini
-3. Klik transaksi untuk melihat **Detail Lengkap**
-
-### 3️⃣ Analisis Laporan
-
-1. Buka menu **"Laporan"**
-2. Lihat visualisasi:
-   - **Pie Chart**: Distribusi pengeluaran
-   - **Line Chart**: Trend keuangan
-   - **Top Categories**: Kategori pengeluaran terbesar
-3. Navigasi antar bulan dengan tombol **◀ ▶**
-
-### 4️⃣ Backup & Restore Data
-
-#### Export Data:
-1. Buka **"Pengaturan"**
-2. Klik **"Export Data"**
-3. File JSON akan terdownload otomatis
-
-#### Import Data:
-1. Buka **"Pengaturan"**
-2. Klik **"Import Data"**
-3. Pilih file JSON backup
-4. Data akan di-restore
-
----
-
-## 🛠️ Teknologi yang Digunakan
-
-- **HTML5** - Struktur aplikasi
-- **CSS3** - Styling & animasi
-- **JavaScript (Vanilla)** - Logika aplikasi
-- **Bootstrap 5** - UI Framework
-- **Font Awesome** - Icons
-- **Chart.js** - Data visualization
-- **LocalStorage API** - Data persistence
-
----
-
-## 📁 Struktur Project
+### Logika Aplikasi
 
 ```
-moneytrack/
-│
-├── index.html          # Halaman utama
-├── styles.css          # Custom styling
-├── app.js              # JavaScript logic
-└── README.md           # Dokumentasi
+PEMASUKAN
+├── Input: Deskripsi, Jumlah, Tanggal
+└── Output: Masuk ke SALDO UTAMA
+
+PENGELUARAN
+├── Input: Deskripsi, Jumlah, Sumber Dana, Tanggal
+├── Jika Sumber = Saldo Utama
+│   └── Output: Dikurangi dari SALDO UTAMA
+└── Jika Sumber = Kantong
+    └── Output: Dikurangi dari KANTONG tersebut
+
+KANTONG
+├── Input: Nama, Icon, Alokasi, Target
+└── Output: Dana dipindahkan dari SALDO UTAMA ke KANTONG
+
+SALDO UTAMA = Total Pemasukan - Total di Kantong - Pengeluaran dari Saldo Utama
 ```
 
----
+## 💾 Backup & Restore
 
-## 🎯 Roadmap
+### Ekspor Data
+1. Klik icon "Pengaturan" (⚙️) di Dashboard
+2. Pilih "Ekspor Data"
+3. File JSON akan terdownload
 
-### Version 1.0 ✅ (Current)
-- [x] CRUD Transaksi
-- [x] Dashboard & Summary
-- [x] Filter & Search
-- [x] Data Visualization
-- [x] Export/Import Data
-- [x] Upload Receipt
+### Impor Data
+1. Buka "Pengaturan"
+2. Pilih "Impor Data"
+3. Pilih file backup (format JSON)
+4. Konfirmasi impor
 
-### Version 1.1 🚧 (Coming Soon)
-- [ ] Dark Mode
-- [ ] Multi-Currency Support
-- [ ] Recurring Transactions
-- [ ] Budget Planning
-- [ ] PWA Support
-- [ ] Cloud Sync
+### Reset Data
+1. Buka "Pengaturan"
+2. Pilih "Reset Data"
+3. Konfirmasi (⚠️ Tidak dapat dibatalkan)
 
-### Version 2.0 🔮 (Future)
-- [ ] Multi-User Support
-- [ ] AI Financial Insights
-- [ ] Mobile App (React Native)
-- [ ] Integration dengan E-Wallet
-- [ ] Bill Reminders
+## 🎯 Fitur Advanced
 
----
+### Filter Transaksi
+- Filter berdasarkan **Tipe**: Semua, Pemasukan, Pengeluaran
+- Filter berdasarkan **Periode**: Semua, Hari Ini, Minggu Ini, Bulan Ini
 
-## 📄 Lisensi
+### Edit & Hapus
+- **Kantong**: Edit nama, icon, saldo, dan target
+- **Transaksi**: Hapus transaksi (saldo akan disesuaikan otomatis)
 
-Distributed under the MIT License. See `LICENSE` file for more information.
+### Theme Toggle
+- Klik icon 🌓 di pojok kanan atas navbar
+- Toggle antara Light Mode dan Dark Mode
+- Preferensi tersimpan otomatis
 
-```
-MIT License
+## 📱 Responsive Breakpoints
 
-Copyright (c) 2025 alfathaannn
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction...
+```css
+Desktop:  > 1024px  (Full features)
+Tablet:   768-1024px (Compact navigation)
+Mobile:   < 768px    (Mobile optimized)
 ```
 
----
+## 🔧 Kustomisasi
 
-## 👨‍💻 Author
+### Mengubah Warna
+Edit variabel CSS di `styles.css`:
+```css
+:root {
+    --primary: #2E4156;      /* Warna utama */
+    --success: #10B981;      /* Warna sukses */
+    --danger: #EF4444;       /* Warna bahaya */
+    --accent: #AAB7B7;       /* Warna aksen */
+}
+```
 
-**Alfathan**
-- Instagram: [@alfathaannn](https://www.instagram.com/alfathaannn)
-- GitHub: [@alfathaannn](https://github.com/alfathaannn)
+### Mengubah Font
+Ganti link Google Fonts di `index.html`:
+```html
+<link href="https://fonts.googleapis.com/css2?family=Your+Font&display=swap">
+```
 
----
+## 🐛 Troubleshooting
 
-## 🙏 Acknowledgments
+### Data Hilang
+- Data tersimpan di LocalStorage browser
+- Jangan clear cache/cookies tanpa backup
+- Gunakan fitur Ekspor untuk backup berkala
 
-- Terima kasih kepada semua kontributor
-- Icons by [Font Awesome](https://fontawesome.com)
-- UI Framework by [Bootstrap](https://getbootstrap.com)
-- Charts by [Chart.js](https://www.chartjs.org)
+### Background Tidak Muncul
+- Pastikan koneksi internet aktif (CDN)
+- Browser harus support WebGL
+- Coba refresh halaman
 
----
+### Modal Tidak Muncul
+- Pastikan SweetAlert2 CDN terload
+- Check browser console untuk error
+- Pastikan JavaScript enabled
+
+## 📄 File Structure
+
+```
+aturduit/
+├── index.html          # Struktur HTML utama
+├── styles.css          # Styling dan tema
+├── app.js             # Logika aplikasi
+└── README.md          # Dokumentasi
+```
+
+## 🔐 Privacy & Security
+
+- ✅ **100% Offline**: Semua data tersimpan lokal di browser
+- ✅ **No Server**: Tidak ada data yang dikirim ke server
+- ✅ **No Account**: Tidak perlu registrasi atau login
+- ⚠️ **Browser Only**: Data terikat ke browser dan device
+- 💡 **Tip**: Gunakan fitur Ekspor untuk backup ke cloud pribadi
+
+## 🎓 Tips Penggunaan
+
+1. **Buat Kantong Sesuai Kebutuhan**
+   - Uang Makan Harian
+   - Biaya Kosan
+   - Dana Darurat
+   - Tabungan Goals
+
+2. **Catat Transaksi Rutin**
+   - Setiap kali dapat uang → Tambah Pemasukan
+   - Setiap kali belanja → Tambah Pengeluaran
+   - Pilih sumber dana yang tepat
+
+3. **Review Berkala**
+   - Cek halaman Statistik setiap minggu
+   - Lihat trend pemasukan vs pengeluaran
+   - Evaluasi alokasi kantong
+
+4. **Backup Rutin**
+   - Ekspor data setiap bulan
+   - Simpan file backup di Google Drive/Cloud
+   - Hindari kehilangan data
+
+## 🚀 Future Features (Roadmap)
+
+- [ ] Export ke Excel/CSV
+- [ ] Kategori transaksi
+- [ ] Recurring transactions
+- [ ] Multi-currency support
+- [ ] Budget planning
+- [ ] Financial goals
+- [ ] Mobile app (PWA)
+- [ ] Cloud sync (optional)
 
 ## 📞 Support
 
-Jika Anda menyukai project ini, berikan ⭐ di GitHub!
+Jika menemui masalah atau punya saran:
+1. Check troubleshooting section
+2. Review dokumentasi
+3. Export data sebagai backup
+4. Clear cache dan coba lagi
 
-Untuk pertanyaan atau support, hubungi:
-- Email: muhammadalfathan0433@gmail.com
-- Instagram DM: [@alfathaannn](https://www.instagram.com/alfathaannn)
+## 📜 License
+
+MIT License - Feel free to use and modify!
 
 ---
 
-<div align="center">
-  
-  **Made with ❤️ by alfathaannn**
-  
-  ⭐ Jangan lupa star repository ini jika bermanfaat! ⭐
-  
-</div>
+**Dibuat dengan ❤️ menggunakan teknologi modern untuk pengelolaan keuangan yang lebih baik**
+
+*Happy Managing Your Finances! 💰*
