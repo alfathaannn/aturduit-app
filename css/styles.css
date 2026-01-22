@@ -1,0 +1,111 @@
+/* Google Fonts handled in HTML via CDN for performance */
+
+/* Custom Utilities */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.dark .glass {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Dynamic Island specific */
+#dynamic-island {
+    /* Base width handling via JS or utility classes */
+    min-width: 320px;
+    height: 60px; /* Base height */
+}
+
+/* Hide scrollbar for clean look */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+/* Modal Transitions */
+.modal-enter {
+    opacity: 0;
+    transform: scale(0.95);
+}
+.modal-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 300ms, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-exit {
+    opacity: 1;
+    transform: scale(1);
+}
+.modal-exit-active {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 200ms, transform 200ms ease-in;
+}
+
+/* Active Nav State */
+
+
+/* Vanilla Calendar Customization for Glassmorphism */
+/* Force transparent background on internal components */
+.vanilla-calendar {
+    background: transparent !important; /* Override library default */
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.vanilla-calendar-day__btn {
+    font-weight: 500;
+}
+
+/* Optional: Improve contrast if needed on blur */
+.dark .vanilla-calendar-day__btn {
+    color: #f1f5f9; /* Slate-100 */
+}
+.dark .vanilla-calendar-day__btn_disabled {
+    color: #475569; /* Slate-600 */
+}
+
+/* Utility: Fade Mask for Horizontal Scroll */
+.fade-mask-x {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+/* Utility: Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
