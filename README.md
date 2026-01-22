@@ -1,8 +1,7 @@
 # 💰 Aturduit - Aplikasi Manajemen Keuangan Modern
 
-![Aturduit Banner]![alt text](_banner_aturduit_v2.png)
-![Version](https://img.shields.io/badge/Version-1.0.0-green?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-orange?style=for-the-badge)
+(_banner_aturduit_v2.png)
+![Version](https://img.shields.io/badge/Version-2.0-green?style=for-the-badge)
 
 Selamat datang di **Aturduit**, sebuah solusi manajemen keuangan pribadi yang dibangun dengan semangat kesederhanaan, keindahan, dan privasi. Dokumen ini disusun untuk memberikan pemahaman menyeluruh tentang setiap aspek proyek, mulai dari filosofi desain hingga baris kode yang menjalankannya.
 
