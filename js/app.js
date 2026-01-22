@@ -3,7 +3,7 @@
  */
 import { store } from './store.js';
 import { ui } from './ui.js';
-import { generateId, downloadJSON, formatCurrency, formatDate } from './utils.js';
+import { generateId, downloadJSON, formatCurrency, formatDate, getTranslation } from './utils.js';
 import { generatePDF } from './pdf-generator.js';
 
 const app = {
@@ -54,10 +54,10 @@ const app = {
                 gyroControls: false,
                 minHeight: 200.00,
                 minWidth: 200.00,
-                highlightColor: 0x60a5fa, // Blue-400
-                midtoneColor: 0x3b82f6, // Blue-500
-                lowlightColor: 0x1e3a8a, // Blue-900
-                baseColor: 0xffffff, // White
+                highlightColor: 0xbae6fd, // Sky-200
+                midtoneColor: 0x7dd3fc, // Sky-300
+                lowlightColor: 0x38bdf8, // Sky-400
+                baseColor: 0xf0f9ff, // Sky-50
                 blurFactor: 0.60,
                 speed: 1.20,
                 zoom: 1.50
@@ -96,6 +96,11 @@ const app = {
             // 3. Export End Datepicker
             this.createDatepicker('export-end-trigger', 'export-end-popup', 'export-end-text', (date) => {
                 document.getElementById('export-end-value').value = date;
+            });
+
+            // 4. Transaction Date Picker
+            this.createDatepicker('transaction-date-trigger', 'transaction-date-popup', 'transaction-date-text', (date) => {
+                document.getElementById('transaction-date-value').value = date;
             });
 
         }, 500); 
@@ -166,6 +171,7 @@ const app = {
         store.state.settings.language = lang;
         document.getElementById('lang-toggle').textContent = lang.toUpperCase();
         ui.translate(lang);
+        ui.renderDashboard(store.state);
         store.saveState();
     },
 
@@ -222,8 +228,8 @@ const app = {
                 left: left,
                 width: rect.width,
                 opacity: 1,
-                duration: 500,
-                easing: 'spring(1, 80, 10, 0)'
+                duration: 300, // Faster
+                easing: 'spring(1, 95, 12, 0)' // Snappier spring
             });
         };
 
@@ -264,8 +270,8 @@ const app = {
                     anime({
                         targets: icon,
                         scale: [1, 1.25, 1],
-                        duration: 300,
-                        easing: 'easeOutBack'
+                        duration: 200, // Faster
+                        easing: 'easeOutQuad' // Lighter
                     });
                 }
 
@@ -295,8 +301,8 @@ const app = {
                     anime({
                         targets: link.querySelector('svg'),
                         translateY: -3,
-                        duration: 300,
-                        easing: 'easeOutExpo'
+                        duration: 200, // Faster
+                        easing: 'easeOutQuad'
                     });
                 }
             });
@@ -305,8 +311,8 @@ const app = {
                  anime({
                     targets: link.querySelector('svg'),
                     translateY: 0,
-                    duration: 300,
-                    easing: 'easeOutExpo'
+                    duration: 200, // Faster
+                    easing: 'easeOutQuad'
                 });
             });
         });
@@ -323,6 +329,15 @@ const app = {
                 select.appendChild(opt);
             });
             
+            // Reset Date Picker
+            document.getElementById('transaction-date-value').value = '';
+            const dateText = document.getElementById('transaction-date-text');
+            if(dateText) {
+                dateText.textContent = 'Hari Ini';
+                dateText.classList.remove('text-slate-800', 'dark:text-white', 'font-medium');
+                dateText.classList.add('text-gray-500');
+            }
+
             ui.modals.open('transaction');
         });
 
@@ -360,9 +375,13 @@ const app = {
                 if (currentType === 'expense') {
                     pocketContainer.classList.remove('hidden');
                     document.getElementById('transaction-pocket-select').required = true;
+                    // Hide Date Picker for Expense (per user request)
+                    document.getElementById('transaction-date-container').classList.add('hidden');
                 } else {
                     pocketContainer.classList.add('hidden');
                     document.getElementById('transaction-pocket-select').required = false;
+                    // Show Date Picker for Income
+                    document.getElementById('transaction-date-container').classList.remove('hidden');
                 }
             });
         });
@@ -382,17 +401,20 @@ const app = {
             const amount = document.getElementById('transaction-amount').value;
             const pocketId = document.getElementById('transaction-pocket-select').value;
             const isRecurring = document.getElementById('transaction-recurring').checked;
+            const dateVal = document.getElementById('transaction-date-value').value;
 
             try {
                 if (currentType === 'expense') {
+                    // For expense, we currently don't use the date picker as it's hidden, but we could if expanded.
+                    // Passing null/undefined relies on defaults.
                     store.addExpense(amount, desc, pocketId, isRecurring);
                 } else {
-                    store.addIncome(amount, desc, isRecurring);
+                    store.addIncome(amount, desc, isRecurring, dateVal || null);
                 }
 
                 ui.modals.close('transaction');
                 e.target.reset();
-                ui.showNotification('Transaksi Berhasil!');
+                ui.showNotification(getTranslation(store.state.settings.language, 'transactionSuccess'));
             } catch (error) {
                 Swal.fire('Error', error.message, 'error');
             }
@@ -404,26 +426,6 @@ const app = {
         document.addEventListener('delete-pocket', (e) => {
            this.handleDeletePocket(e.detail);
         });
-
-        // Settings: Reset Data
-        const btnReset = document.getElementById('reset-data-btn');
-        if(btnReset) {
-             btnReset.addEventListener('click', () => {
-                 Swal.fire({
-                     title: 'Reset Data?',
-                     text: "Semua data akan dihapus permanen!",
-                     icon: 'warning',
-                     showCancelButton: true,
-                     confirmButtonColor: '#d33',
-                     confirmButtonText: 'Ya, Reset'
-                 }).then((result) => {
-                     if (result.isConfirmed) {
-                         store.resetData();
-                         ui.showNotification('Data berhasil di-reset');
-                     }
-                 });
-             });
-        }
 
         // --- Filter Events ---
         
@@ -525,16 +527,17 @@ const app = {
                 const pocket = store.state.pockets.find(p => p.id === id);
                 
                 Swal.fire({
-                    title: 'Ubah Nama Kantong',
+                    title: getTranslation(store.state.settings.language, 'editPocketTitle'),
                     input: 'text',
                     inputValue: pocket.name,
                     showCancelButton: true,
-                    confirmButtonText: 'Simpan'
+                    confirmButtonText: getTranslation(store.state.settings.language, 'save'),
+                    cancelButtonText: getTranslation(store.state.settings.language, 'cancel')
                 }).then((result) => {
                     if(result.isConfirmed && result.value) {
                         store.renamePocket(id, result.value);
                         ui.modals.close('pocket-details');
-                        ui.showNotification('Nama Kantong Diubah!');
+                        ui.showNotification(getTranslation(store.state.settings.language, 'successTitle'));
                     }
                 });
             });
@@ -551,6 +554,13 @@ const app = {
         }
 
         // --- Settings & Data Actions ---
+        
+        const exportPdfBtn = document.getElementById('export-pdf-btn');
+        if(exportPdfBtn) {
+            exportPdfBtn.addEventListener('click', () => {
+                ui.modals.open('export-pdf');
+            });
+        }
         
         const themeToggle = document.getElementById('theme-toggle');
         if(themeToggle) {
@@ -571,10 +581,10 @@ const app = {
                         });
                     } else {
                         this.vantaEffect.setOptions({
-                            highlightColor: 0x60a5fa, // Blue-400
-                            midtoneColor: 0x3b82f6, // Blue-500
-                            lowlightColor: 0x1e3a8a, // Blue-900
-                            baseColor: 0xffffff // White
+                            highlightColor: 0xbae6fd, // Sky-200
+                            midtoneColor: 0x7dd3fc, // Sky-300
+                            lowlightColor: 0x38bdf8, // Sky-400
+                            baseColor: 0xf0f9ff // Sky-50
                         });
                     }
                 }
@@ -590,93 +600,143 @@ const app = {
             });
         }
 
-        const resetBtn = document.getElementById('reset-data-btn');
-        if(resetBtn) {
-            resetBtn.addEventListener('click', () => {
+        // Settings: Reset Data
+        const btnReset = document.getElementById('reset-data-btn');
+        if(btnReset) {
+             btnReset.addEventListener('click', () => {
+                 const lang = store.state.settings.language;
+                 Swal.fire({
+                     title: getTranslation(lang, 'resetTitle'),
+                     text: getTranslation(lang, 'resetDesc'),
+                     icon: 'warning',
+                     showCancelButton: true,
+                     confirmButtonColor: '#dc2626',
+                     cancelButtonColor: '#64748b',
+                     confirmButtonText: getTranslation(lang, 'resetConfirm'),
+                     cancelButtonText: getTranslation(lang, 'cancel'),
+                     background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                     color: document.documentElement.classList.contains('dark') ? '#fff' : '#1e293b'
+                 }).then((result) => {
+                     if (result.isConfirmed) {
+                         store.resetData();
+                         Swal.fire({
+                             title: getTranslation(lang, 'resetSuccessTitle'),
+                             text: getTranslation(lang, 'resetSuccessDesc'),
+                             icon: 'success',
+                             confirmButtonColor: '#3b82f6',
+                             background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                             color: document.documentElement.classList.contains('dark') ? '#fff' : '#1e293b'
+                         });
+                         ui.renderDashboard(store.state); // Immediate refresh
+                     }
+                 });
+             });
+        }
+
+        // Settings: Input File Trigger Logic
+        const importCard = document.getElementById('import-trigger-card');
+        const importInput = document.getElementById('import-json-input');
+        
+        if(importCard && importInput) {
+            importCard.addEventListener('click', () => {
+                const lang = store.state.settings.language;
                 Swal.fire({
-                    title: 'Hapus Semua Data?',
-                    text: "Tidak bisa dibatalkan!",
-                    icon: 'warning',
+                    title: getTranslation(lang, 'restoreTitle'),
+                    text: getTranslation(lang, 'restoreDesc'),
+                    icon: 'info',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Ya, Reset!'
+                    confirmButtonColor: '#3b82f6',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: getTranslation(lang, 'restoreConfirm'),
+                    cancelButtonText: getTranslation(lang, 'cancel'),
+                    background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                    color: document.documentElement.classList.contains('dark') ? '#fff' : '#1e293b'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        store.resetData();
-                        Swal.fire('Reset!', 'Data berhasil direset.', 'success');
+                        importInput.click();
                     }
                 });
             });
-        }
 
-        const exportBtn = document.getElementById('export-pdf-btn');
-        if(exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                // Pre-fill dates (e.g., current month)
-                const now = new Date();
-                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-                const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-                
-                document.getElementById('export-start-value').value = firstDay;
-                document.getElementById('export-end-value').value = lastDay;
-
-                // Update Button Text
-                const startText = document.getElementById('export-start-text');
-                const endText = document.getElementById('export-end-text');
-                if(startText) {
-                    startText.textContent = formatDate(firstDay);
-                    startText.classList.remove('text-gray-500');
-                    startText.classList.add('text-slate-800', 'dark:text-white', 'font-medium');
-                }
-                if(endText) {
-                    endText.textContent = formatDate(lastDay);
-                    endText.classList.remove('text-gray-500');
-                    endText.classList.add('text-slate-800', 'dark:text-white', 'font-medium');
-                }
-
-                ui.modals.open('export-pdf');
-            });
-        }
-
-        const importInput = document.getElementById('import-json-input');
-        if(importInput) {
             importInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if(!file) return;
                 
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    const success = store.importData(event.target.result);
-                    if(success) {
-                        Swal.fire('Sukses', 'Data berhasil diimport!', 'success');
-                        ui.showNotification('Data Imported');
-                        this.updateView();
-                    } else {
-                        Swal.fire('Error', 'Format JSON tidak valid', 'error');
+                    try {
+                        const success = store.importData(event.target.result);
+                        if(success) {
+                            Swal.fire({
+                                title: getTranslation(store.state.settings.language, 'restoreSuccessTitle'),
+                                text: getTranslation(store.state.settings.language, 'restoreSuccessDesc'),
+                                icon: 'success',
+                                confirmButtonColor: '#3b82f6',
+                                background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                                color: document.documentElement.classList.contains('dark') ? '#fff' : '#1e293b'
+                            });
+                            this.updateView();
+                        } else {
+                            throw new Error('Format Invalid');
+                        }
+                    } catch (err) {
+                        Swal.fire({
+                             title: 'Gagal Memproses',
+                             text: 'Format file tidak valid atau rusak.',
+                             icon: 'error',
+                             background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                             color: document.documentElement.classList.contains('dark') ? '#fff' : '#1e293b'
+                        });
                     }
+                    // Reset input
+                    e.target.value = '';
                 };
                 reader.readAsText(file);
             });
         }
 
-        // Export JSON Button
+        // Settings: Export JSON
         const exportJsonBtn = document.getElementById('export-json-btn');
         if(exportJsonBtn) {
             exportJsonBtn.addEventListener('click', () => {
-                try {
-                    const jsonData = store.exportData();
-                    const blob = new Blob([jsonData], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    const timestamp = new Date().toISOString().split('T')[0];
-                    link.download = `aturduit-data-${timestamp}.json`;
-                    link.click();
-                    URL.revokeObjectURL(url);
-                    ui.showNotification('Data Exported!');
-                } catch (error) {
-                    Swal.fire('Error', 'Gagal mengexport data: ' + error.message, 'error');
-                }
+                const lang = store.state.settings.language;
+                Swal.fire({
+                    title: getTranslation(lang, 'backupTitle'),
+                    text: getTranslation(lang, 'backupDesc'),
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981', // Emerald
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: getTranslation(lang, 'backupConfirm'),
+                    cancelButtonText: getTranslation(lang, 'cancel'),
+                    background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                    color: document.documentElement.classList.contains('dark') ? '#fff' : '#1e293b'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const jsonData = store.exportData();
+                            const blob = new Blob([jsonData], { type: 'application/json' });
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            const timestamp = new Date().toISOString().split('T')[0];
+                            link.download = `aturduit-backup-${timestamp}.json`;
+                            link.click();
+                            URL.revokeObjectURL(url);
+                            
+                            Swal.fire({
+                                title: getTranslation(lang, 'backupSuccessTitle'),
+                                text: getTranslation(lang, 'backupSuccessDesc'),
+                                icon: 'success',
+                                confirmButtonColor: '#3b82f6',
+                                background: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+                                color: document.documentElement.classList.contains('dark') ? '#fff' : '#1e293b'
+                            });
+                        } catch (error) {
+                            Swal.fire('Error', 'Gagal: ' + error.message, 'error');
+                        }
+                    }
+                });
             });
         }
     },
@@ -685,20 +745,21 @@ const app = {
 
     handleDeletePocket(id) {
         const pocket = store.state.pockets.find(p => p.id === id);
+        const lang = store.state.settings.language;
         
         Swal.fire({
-            title: 'Hapus Kantong?',
-            text: `Saldo Rp ${formatCurrency(pocket.balance)} akan dikembalikan ke Saldo Utama.`,
+            title: getTranslation(lang, 'deletePocketTitle'),
+            text: `(Rp ${formatCurrency(pocket.balance)}) ${getTranslation(lang, 'pocketRefundDesc')}`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            confirmButtonText: 'Hapus & Refund',
-            cancelButtonText: 'Batal'
+            confirmButtonText: getTranslation(lang, 'deleteAndRefund'),
+            cancelButtonText: getTranslation(lang, 'cancel')
         }).then((result) => {
             if (result.isConfirmed) {
                try {
                    store.deletePocket(id);
-                   ui.showNotification('Kantong dihapus & saldo dikembalikan');
+                   ui.showNotification(getTranslation(lang, 'pocketDeleted'));
                } catch (e) {
                    Swal.fire('Error', e.message, 'error');
                }
@@ -752,7 +813,7 @@ const app = {
                 store.allocateToPocket(id, amount);
                 ui.modals.close('allocate');
                 e.target.reset();
-                ui.showNotification('Saldo berhasil dipindahkan!');
+                ui.showNotification(getTranslation(store.state.settings.language, 'balanceMoved'));
             } catch (err) {
                 Swal.fire('Gagal', err.message, 'error');
             }
@@ -767,12 +828,12 @@ const app = {
                 const endDate = document.getElementById('export-end-value').value;
 
                 if (!startDate || !endDate) {
-                    Swal.fire('Error', 'Harap pilih rentang tanggal', 'warning');
+                    Swal.fire(getTranslation(store.state.settings.language, 'errorTitle'), getTranslation(store.state.settings.language, 'val_dateRange'), 'warning');
                     return;
                 }
 
                 if (new Date(startDate) > new Date(endDate)) {
-                    Swal.fire('Error', 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir', 'error');
+                    Swal.fire(getTranslation(store.state.settings.language, 'errorTitle'), getTranslation(store.state.settings.language, 'val_dateInvalid'), 'error');
                     return;
                 }
 
@@ -788,18 +849,18 @@ const app = {
                 });
 
                 if (filtered.length === 0) {
-                    Swal.fire('Info', 'Tidak ada transaksi pada rentang tanggal tersebut', 'info');
+                    Swal.fire(getTranslation(store.state.settings.language, 'info'), getTranslation(store.state.settings.language, 'noTransactionsRange'), 'info');
                     return;
                 }
 
                 try {
                     // Pass filtered transactions AND pockets list for detailed report
-                    generatePDF(filtered, store.state.pockets, startDate, endDate);
+                    generatePDF(filtered, store.state.pockets, startDate, endDate, store.state.settings.language);
                     ui.modals.close('export-pdf');
-                    ui.showNotification('PDF Berhasil Digenerate!');
+                    ui.showNotification(getTranslation(store.state.settings.language, 'pdfSuccess'));
                 } catch (err) {
                     console.error(err);
-                    Swal.fire('Error', 'Gagal membuat PDF: ' + err.message, 'error');
+                    Swal.fire(getTranslation(store.state.settings.language, 'errorTitle'), getTranslation(store.state.settings.language, 'pdfFailed') + err.message, 'error');
                 }
             });
         }

@@ -2,7 +2,7 @@
  * Aturduit - UI Module
  * Handles rendering and visual Logic
  */
-import { formatCurrency, formatDate, translations } from './utils.js';
+import { formatCurrency, formatDate, translations, getTranslation } from './utils.js';
 
 export const ui = {
     elements: {
@@ -15,7 +15,6 @@ export const ui = {
         views: document.querySelectorAll('.view-section'),
         dynamicIsland: document.getElementById('dynamic-island'),
         navContent: document.getElementById('nav-content'),
-        navContent: document.getElementById('nav-content'),
         notificationContent: document.getElementById('notification-content'),
         currentDate: document.getElementById('current-date'), // New Reference
         
@@ -26,6 +25,7 @@ export const ui = {
         modalAllocate: document.getElementById('modal-allocate'),     // New
         pocketSelect: document.getElementById('transaction-pocket-select'),
         modalPocketSelector: document.getElementById('pocket-selector-container'), // Fix: Needed for toggle
+        modalExportPdf: document.getElementById('modal-export-pdf'),
     },
     
     chartInstance: null,
@@ -40,6 +40,7 @@ export const ui = {
     startClock() {
         const update = () => {
             const now = new Date();
+            const locale = this.currentLang === 'id' ? 'id-ID' : 'en-US';
             const options = { 
                 weekday: 'long', 
                 day: 'numeric', 
@@ -51,12 +52,19 @@ export const ui = {
                 timeZone: 'Asia/Jakarta',
                 timeZoneName: 'short'
             };
-            // Format: "Senin, 1 Januari 2024, 20.30.00 WIB"
-            this.elements.currentDate.textContent = now.toLocaleDateString('id-ID', options).replace(/\./g, ':');
+            if(this.elements.currentDate) {
+                this.elements.currentDate.textContent = now.toLocaleDateString(locale, options).replace(/\./g, ':');
+            }
         };
         
-        update(); // Initial call
-        setInterval(update, 1000); // Update every second
+        update();
+        setInterval(update, 1000);
+    },
+
+    calcStats(transactions) {
+        const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+        const expense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+        return { income, expense };
     },
 
     renderDashboard(state) {
@@ -64,7 +72,6 @@ export const ui = {
         const totalPockets = state.pockets.reduce((acc, p) => acc + p.balance, 0);
         const globalTotal = state.mainBalance + totalPockets;
 
-        // Animate numbers
         updateNumberAnimation(this.elements.totalBalance, globalTotal);
         
         const stats = this.calcStats(state.transactions);
@@ -72,8 +79,6 @@ export const ui = {
         updateNumberAnimation(this.elements.totalExpense, stats.expense);
 
         this.renderChart(state.transactions);
-        
-        // Render Balance Breakdown
         this.renderBalanceBreakdown(state);
     },
 
@@ -81,17 +86,18 @@ export const ui = {
         const pocketsTotal = state.pockets.reduce((acc, p) => acc + p.balance, 0);
         
         // Update Summaries
-        document.getElementById('summary-main-balance').textContent = formatCurrency(state.mainBalance);
-        document.getElementById('summary-pockets-total').textContent = formatCurrency(pocketsTotal);
+        if(document.getElementById('summary-main-balance'))
+            document.getElementById('summary-main-balance').textContent = formatCurrency(state.mainBalance);
+        if(document.getElementById('summary-pockets-total'))
+            document.getElementById('summary-pockets-total').textContent = formatCurrency(pocketsTotal);
 
-        // Render List
         const list = document.getElementById('pockets-breakdown-list');
         if(!list) return;
         
         list.innerHTML = '';
         
         if (state.pockets.length === 0) {
-            list.innerHTML = '<p class="text-center text-xs text-gray-400 italic">Belum ada kantong dibuat.</p>';
+            list.innerHTML = `<p class="text-center text-xs text-gray-400 italic">${getTranslation(this.currentLang, 'noPockets')}</p>`;
         } else {
             state.pockets.forEach(p => {
                 const percentage = pocketsTotal > 0 ? Math.round((p.balance / pocketsTotal) * 100) : 0;
@@ -123,14 +129,14 @@ export const ui = {
             this.elements.pocketsGrid.innerHTML = `
                 <div class="col-span-full text-center py-10 opacity-50">
                     <i data-lucide="wallet" class="mx-auto w-12 h-12 mb-2"></i>
-                    <p>Belum ada kantong. Buat satu sekarang!</p>
+                    <p>${getTranslation(this.currentLang, 'noPockets')}</p>
                 </div>
             `;
         }
         
         pockets.forEach(pocket => {
             const el = document.createElement('div');
-            el.setAttribute('data-id', pocket.id); // Add ID here
+            el.setAttribute('data-id', pocket.id);
             el.className = `bg-white dark:bg-slate-800 rounded-3xl p-6 border border-gray-100 dark:border-slate-700 shadow-sm relative overflow-hidden group hover:shadow-md transition-all cursor-pointer`;
             el.innerHTML = `
                 <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-${pocket.color}-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
@@ -146,7 +152,7 @@ export const ui = {
                 </p>
             `;
             el.querySelector('.delete-pocket-btn').addEventListener('click', (e) => {
-                e.stopPropagation(); // prevent opening details
+                e.stopPropagation();
                 document.dispatchEvent(new CustomEvent('delete-pocket', { detail: pocket.id }));
             });
             this.elements.pocketsGrid.appendChild(el);
@@ -156,15 +162,16 @@ export const ui = {
 
     renderHistory(transactions, pockets) {
         this.elements.transactionList.innerHTML = '';
-        
+        const locale = this.currentLang === 'id' ? 'id-ID' : 'en-US';
+
         if (transactions.length === 0) {
             this.elements.transactionList.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-12 text-center opacity-60">
                     <div class="bg-gray-100 dark:bg-slate-800 p-4 rounded-full mb-4">
                         <i data-lucide="receipt" class="w-8 h-8 text-gray-400"></i>
                     </div>
-                    <p class="text-gray-500 font-medium">Belum ada transaksi</p>
-                    <p class="text-xs text-gray-400 mt-1">Mulai catat keuanganmu sekarang!</p>
+                    <p class="text-gray-500 font-medium">${getTranslation(this.currentLang, 'noTransactions')}</p>
+                    <p class="text-xs text-gray-400 mt-1">${getTranslation(this.currentLang, 'startTracking')}</p>
                 </div>
             `;
             lucide.createIcons();
@@ -177,33 +184,24 @@ export const ui = {
             const date = new Date(t.date);
             const dateKey = date.toDateString();
 
-            // 1. Render Date Header (Divider)
             if (dateKey !== lastDateKey) {
                 const header = document.createElement('div');
-                // Sticky Header for Professional Feel
                 header.className = 'sticky top-0 z-10 py-3 px-1 mb-2 mt-4 flex items-center gap-3';
-                
-                const dateStr = date.toLocaleDateString('id-ID', { 
+                const dateStr = date.toLocaleDateString(locale, { 
                     weekday: 'long', 
                     day: 'numeric', 
                     month: 'long', 
                     year: 'numeric' 
                 });
-
                 header.innerHTML = `
                     <div class="h-2 w-2 rounded-full bg-blue-500 ring-2 ring-blue-100 dark:ring-blue-900"></div>
                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">${dateStr}</span>
                 `;
-                
                 this.elements.transactionList.appendChild(header);
                 lastDateKey = dateKey;
             }
 
-            // 2. Render Transaction Card
             const isIncome = t.type === 'income' || t.type === 'transfer_in';
-            const isExpense = t.type === 'expense' || t.type === 'transfer_out';
-            
-            // Icon & Color Logic
             let colorClass, icon, sign;
             
             if (t.type === 'income') {
@@ -214,11 +212,11 @@ export const ui = {
                 colorClass = 'text-red-600 bg-red-50 dark:bg-red-900/20';
                 icon = 'arrow-up-right';
                 sign = '-';
-            } else if (t.type === 'transfer_in') { // Refund
+            } else if (t.type === 'transfer_in') {
                 colorClass = 'text-blue-600 bg-blue-50 dark:bg-blue-900/20';
                 icon = 'refresh-ccw';
                 sign = '+';
-            } else { // transfer_out (Allocation)
+            } else {
                 colorClass = 'text-orange-600 bg-orange-50 dark:bg-orange-900/20';
                 icon = 'arrow-right-circle';
                 sign = '';
@@ -229,8 +227,6 @@ export const ui = {
 
             const el = document.createElement('div');
             el.className = 'relative flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/80 transition-all cursor-pointer group hover:shadow-sm mb-2 last:mb-0';
-            
-            // Hover indicator
             el.innerHTML = `
                 <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 <div class="flex items-center gap-4">
@@ -243,7 +239,7 @@ export const ui = {
                             ${t.recurring ? '<i data-lucide="repeat" class="w-3 h-3 ml-2 text-blue-500" title="Recurring"></i>' : ''}
                         </h4>
                         <div class="flex items-center mt-1">
-                            <span class="text-xs text-gray-400 font-mono">${new Date(t.date).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}).replace('.', ':')}</span>
+                            <span class="text-xs text-gray-400 font-mono">${new Date(t.date).toLocaleTimeString(locale, {hour: '2-digit', minute:'2-digit'}).replace('.', ':')}</span>
                             ${pocketBadge}
                         </div>
                     </div>
@@ -256,10 +252,15 @@ export const ui = {
             `;
             
             el.addEventListener('click', () => {
-                // Determine Wallet/Pocket Info
-                let walletInfo = "Saldo Utama";
+                let walletInfo = getTranslation(this.currentLang, 'mainBalance');
                 if(t.type === 'expense' && pocket) walletInfo = pocket.name;
                 
+                let typeDisplay = t.type.toUpperCase().replace('_', ' ');
+                if (t.type === 'income') typeDisplay = getTranslation(this.currentLang, 'income');
+                if (t.type === 'expense') typeDisplay = getTranslation(this.currentLang, 'expense');
+                if (t.type === 'transfer_in') typeDisplay = 'REFUND';
+                if (t.type === 'transfer_out') typeDisplay = 'ALLOCATION';
+
                 Swal.fire({
                     width: 'auto',
                     showConfirmButton: false,
@@ -267,31 +268,29 @@ export const ui = {
                     html: `
                         <div class="p-2 dark:text-gray-200 text-left">
                             <div class="flex items-center justify-between mb-6">
-                                <h3 class="text-lg font-bold">Detail Transaksi</h3>
+                                <h3 class="text-lg font-bold">${getTranslation(this.currentLang, 'detailTransaction')}</h3>
                                 <button onclick="Swal.close()" class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors">
                                     <i data-lucide="x" class="w-5 h-5"></i>
                                 </button>
                             </div>
-                            
                             <div class="flex flex-col items-center mb-6">
                                 <div class="p-4 rounded-full ${colorClass.split(' ')[1]} mb-3">
                                     <i data-lucide="${icon}" class="w-8 h-8 ${colorClass.split(' ')[0]}"></i>
                                 </div>
                                 <h2 class="text-2xl font-bold ${colorClass.split(' ')[0]}">${sign} ${formatCurrency(t.amount)}</h2>
-                                <p class="text-gray-500 font-medium mt-1">${t.type.toUpperCase().replace('_', ' ')}</p>
+                                <p class="text-gray-500 font-medium mt-1">${typeDisplay}</p>
                             </div>
-
                             <div class="space-y-4 bg-gray-50 dark:bg-slate-900/50 p-4 rounded-2xl">
                                 <div class="flex justify-between border-b border-gray-200 dark:border-slate-700 pb-3">
-                                    <span class="text-gray-500 text-sm">Deskripsi</span>
+                                    <span class="text-gray-500 text-sm">${getTranslation(this.currentLang, 'desc')}</span>
                                     <span class="font-medium text-right">${t.description}</span>
                                 </div>
                                 <div class="flex justify-between border-b border-gray-200 dark:border-slate-700 pb-3">
-                                    <span class="text-gray-500 text-sm">Waktu</span>
-                                    <span class="font-medium text-right">${date.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}, ${date.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}).replace('.',':')}</span>
+                                    <span class="text-gray-500 text-sm">${getTranslation(this.currentLang, 'time')}</span>
+                                    <span class="font-medium text-right">${date.toLocaleDateString(locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'})}, ${date.toLocaleTimeString(locale, {hour:'2-digit', minute:'2-digit'}).replace('.',':')}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500 text-sm">Sumber Dana</span>
+                                    <span class="text-gray-500 text-sm">${getTranslation(this.currentLang, 'sourceFund')}</span>
                                     <div class="flex items-center justify-end gap-2">
                                         <span class="font-medium">${walletInfo}</span>
                                     </div>
@@ -312,8 +311,8 @@ export const ui = {
     renderChart(transactions) {
         if (this.chartInstance) this.chartInstance.destroy();
         const ctx = document.getElementById('financeChart').getContext('2d');
+        const locale = this.currentLang === 'id' ? 'id-ID' : 'en-US';
         
-        // 1. Get last 7 days dates
         const days = [];
         for (let i = 6; i >= 0; i--) {
             const d = new Date();
@@ -321,25 +320,18 @@ export const ui = {
             days.push(d);
         }
 
-        // 2. Aggregate Data per Day
         const incomeData = [];
         const expenseData = [];
         const labels = [];
 
         days.forEach(day => {
-            const dateStr = day.toDateString(); // For comparison
-            labels.push(day.toLocaleDateString('id-ID', {day: '2-digit', month: 'short'})); // Label "20 Jan"
+            const dateStr = day.toDateString();
+            labels.push(day.toLocaleDateString(locale, {day: '2-digit', month: 'short'}));
             
-            // Filter transactions for this day
             const dayTrans = transactions.filter(t => new Date(t.date).toDateString() === dateStr);
             
-            const income = dayTrans
-                .filter(t => t.type === 'income')
-                .reduce((sum, t) => sum + t.amount, 0);
-                
-            const expense = dayTrans
-                .filter(t => t.type === 'expense')
-                .reduce((sum, t) => sum + t.amount, 0);
+            const income = dayTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const expense = dayTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
 
             incomeData.push(income);
             expenseData.push(expense);
@@ -351,9 +343,9 @@ export const ui = {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Pemasukan',
+                        label: getTranslation(this.currentLang, 'chartIncome'),
                         data: incomeData,
-                        borderColor: '#16a34a', // Green-600
+                        borderColor: '#16a34a',
                         backgroundColor: 'rgba(22, 163, 74, 0.1)',
                         tension: 0.4,
                         fill: true,
@@ -363,9 +355,9 @@ export const ui = {
                         pointHoverBorderColor: '#16a34a'
                     },
                     {
-                        label: 'Pengeluaran',
+                        label: getTranslation(this.currentLang, 'chartExpense'),
                         data: expenseData,
-                        borderColor: '#dc2626', // Red-600
+                        borderColor: '#dc2626',
                         backgroundColor: 'rgba(220, 38, 38, 0.1)',
                         tension: 0.4,
                         fill: true,
@@ -379,20 +371,11 @@ export const ui = {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
+                interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: {
                         position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            font: {
-                                family: "'Google Sans', sans-serif", // User requested Google Sans
-                                size: 12
-                            }
-                        }
+                        labels: { usePointStyle: true, font: { family: "'Google Sans', sans-serif", size: 12 } }
                     },
                     tooltip: {
                         backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -406,34 +389,21 @@ export const ui = {
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(context.parsed.y);
-                                }
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(context.parsed.y);
                                 return label;
                             }
                         }
                     }
                 },
                 scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            font: { family: "'Google Sans', sans-serif" }
-                        }
-                    },
+                    x: { grid: { display: false }, ticks: { font: { family: "'Google Sans', sans-serif" } } },
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            borderDash: [5, 5],
-                            color: '#e2e8f0'
-                        },
+                        grid: { borderDash: [5, 5], color: '#e2e8f0' },
                         ticks: {
                             font: { family: "'Google Sans', sans-serif" },
                             callback: function(value) {
-                                // Shorten large numbers: 1M, 500k
                                 if (value >= 1000000) return 'Rp ' + (value/1000000).toFixed(1) + 'jt';
                                 if (value >= 1000) return 'Rp ' + (value/1000).toFixed(0) + 'rb';
                                 return value;
@@ -444,26 +414,31 @@ export const ui = {
             }
         });
     },
-
+    
     // --- Internationalization ---
     translate(lang) {
-        // This is a simple implementation. In a real app, use data-i18n attributes.
-        // For this demo, we will rely on re-rendering or specific text updates if strictly required by user.
-        // Given the complexity of existing HTML, a full i18n implementation would replace innerText of elements with data-i18n.
-        // I will add a helper to update common elements.
-        
+        this.currentLang = lang; 
         const t = translations[lang];
         if(!t) return;
 
-        // Examples of updates (non-exhaustive list for demo)
+        // 1. Text Content
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if(t[key]) el.textContent = t[key];
         });
+
+        // 2. Titles (Tooltip)
+         document.querySelectorAll('[data-i18n-title]').forEach(el => {
+            const key = el.getAttribute('data-i18n-title');
+            if(t[key]) el.title = t[key];
+        });
         
-        // Update placeholders
+        // 3. Placeholders
         const descInput = document.getElementById('transaction-desc');
-        if(descInput) descInput.placeholder = lang === 'id' ? 'Makan siang, Gaji, dll' : 'Lunch, Salary, etc';
+        if(descInput) descInput.placeholder = t.descPlaceholder || descInput.placeholder;
+        
+        const pocketInput = document.getElementById('pocket-name-input');
+        if(pocketInput) pocketInput.placeholder = t.examplePocket || pocketInput.placeholder;
     },
 
     // --- Dynamic Island Notification ---

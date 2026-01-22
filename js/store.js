@@ -72,10 +72,10 @@ class Store {
 
     // --- Actions ---
 
-    addIncome(amount, description, isRecurring = false) {
+    addIncome(amount, description, isRecurring = false, date = null) {
         const transaction = {
             id: generateId(),
-            date: new Date().toISOString(),
+            date: date ? new Date(date).toISOString() : new Date().toISOString(),
             description,
             type: 'income',
             amount: parseFloat(amount),
@@ -170,14 +170,14 @@ class Store {
         this.saveState();
     }
 
-    addExpense(amount, description, pocketId, isRecurring = false) {
+    addExpense(amount, description, pocketId, isRecurring = false, date = null) {
         const pocket = this.state.pockets.find(p => p.id === pocketId);
         if (!pocket) throw new Error('Wajib pilih kantong untuk pengeluaran!');
         if (pocket.balance < amount) throw new Error(`Saldo kantong "${pocket.name}" tidak cukup!`);
 
         const transaction = {
             id: generateId(),
-            date: new Date().toISOString(),
+            date: date ? new Date(date).toISOString() : new Date().toISOString(),
             description,
             type: 'expense',
             amount: parseFloat(amount),

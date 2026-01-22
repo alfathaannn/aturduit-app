@@ -65,10 +65,10 @@
     <div id="vanta-bg" class="fixed inset-0 -z-20 pointer-events-none"></div>
 
     <!-- Background Overlay -->
-    <div id="bg-overlay" class="fixed inset-0 -z-10 pointer-events-none backdrop-blur-xl bg-blue-600/70 dark:bg-slate-900/70 transition-colors duration-300"></div>
+    <div id="bg-overlay" class="fixed inset-0 -z-10 pointer-events-none backdrop-blur-xl bg-blue-100/50 dark:bg-slate-900/70 transition-colors duration-300"></div>
 
     <!-- Dynamic Island Navbar -->
-    <nav id="dynamic-island" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 shadow-lg rounded-full flex items-center justify-between px-3 py-2.5 md:px-6 md:py-3 transition-all duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] w-auto max-w-[95vw] md:max-w-[90vw]">
+    <nav id="dynamic-island" style="box-shadow: 0 10px 40px -10px rgba(0,0,0,0.2), 0 20px 60px -15px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 0 1px rgba(255,255,255,0.1);" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/90 dark:bg-slate-800/90 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-full flex items-center justify-between px-3 py-2.5 md:px-6 md:py-3 transition-all duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] w-auto max-w-[95vw] md:max-w-[90vw]">
         <!-- Nav Content -->
         <div id="nav-content" class="relative flex items-center gap-1 sm:gap-3 md:gap-6 justify-between w-full">
             <!-- Floating Active Indicator -->
@@ -108,7 +108,7 @@
              <!-- Header -->
              <div class="flex justify-between items-center mb-6">
                 <div>
-                    <p class="text-3xl font-bold text-white mb-2 tracking-tight break-words">Aturduit</p>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight break-words">Aturduit</p>
                 </div>
                 <div class="flex gap-2">
                     <button id="lang-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors font-bold text-sm">ID</button>
@@ -120,12 +120,11 @@
              </div>
 
              <!-- Main Balance Card -->
-             <div class="bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-white/20 dark:border-slate-700/30 rounded-3xl p-8 shadow-xl mb-8 relative overflow-hidden group">
+             <div class="bg-white/70 dark:bg-slate-800/50 backdrop-blur-md border border-white/20 dark:border-slate-700/30 rounded-3xl p-8 shadow-xl mb-8 relative overflow-hidden group">
                 <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-700"></div>
                 <div class="relative z-10 text-center">
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2" data-i18n="totalBalance">Total Saldo</p>
                     <h2 class="text-3xl md:text-5xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight break-words">
-                        <span class="text-lg md:text-2xl align-top opacity-50 mr-1">Rp</span>
                         <span id="main-balance-display">0</span>
                     </h2>
                 </div>
@@ -161,11 +160,11 @@
                <!-- Main vs Pockets Summary -->
                <div class="grid grid-cols-2 gap-4">
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/30">
-                       <p class="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Saldo Utama</p>
+                       <p class="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1" data-i18n="mainBalance">Saldo Utama</p>
                        <p id="summary-main-balance" class="text-lg font-bold text-slate-800 dark:text-white">Rp 0</p>
                     </div>
                     <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-2xl border border-purple-100 dark:border-purple-800/30">
-                       <p class="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1">Total Kantong</p>
+                       <p class="text-xs text-purple-600 dark:text-purple-400 font-medium mb-1" data-i18n="pocketsTotal">Total Kantong</p>
                        <p id="summary-pockets-total" class="text-lg font-bold text-slate-800 dark:text-white">Rp 0</p>
                     </div>
                </div>
@@ -211,7 +210,7 @@
                         <div class="bg-red-50 dark:bg-red-900/20 text-red-600 p-1 rounded-full group-hover:bg-red-600 group-hover:text-white transition-colors">
                             <i data-lucide="file-text" class="w-4 h-4"></i>
                         </div>
-                        <span class="bg-clip-text text-transparent bg-gradient-to-r from-slate-700 to-slate-900 dark:from-gray-200 dark:to-gray-400 group-hover:from-red-600 group-hover:to-rose-600 transition-all">Export PDF</span>
+                        <span class="bg-clip-text text-transparent bg-gradient-to-r from-slate-700 to-slate-900 dark:from-gray-200 dark:to-gray-400 group-hover:from-red-600 group-hover:to-rose-600 transition-all" data-i18n="downloadPDF">Export PDF</span>
                     </button>
                 </div>
             </div>
@@ -220,7 +219,7 @@
                 <div class="toolbar-item flex-shrink-0 w-full md:w-auto group/date">
                     <div class="relative inline-block w-full">
                         <button type="button" id="datepicker-trigger" class="relative w-full md:w-auto py-2.5 px-5 flex items-center justify-between md:justify-center gap-3 border border-gray-200/80 dark:border-slate-700/80 rounded-xl text-sm font-medium bg-white/80 dark:bg-slate-900/80 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all duration-300 active:scale-95">
-                            <span id="datepicker-text" class="truncate font-medium">Pilih Tanggal</span>
+                            <span id="datepicker-text" class="truncate font-medium" data-i18n="pickDate">Pilih Tanggal</span>
                             <div class="p-1 bg-gray-100 dark:bg-slate-800 rounded-lg group-hover/date:bg-blue-50 dark:group-hover/date:bg-blue-900/30 transition-colors">
                                 <svg class="w-4 h-4 text-gray-400 group-hover/date:text-blue-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
                             </div>
@@ -232,16 +231,16 @@
                 <div class="flex flex-1 items-center justify-end gap-2 w-full md:w-auto overflow-hidden">
                     
                     <div class="toolbar-item overflow-x-auto no-scrollbar flex gap-2 p-1">
-                        <button class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300 whitespace-nowrap" data-filter="all">Semua</button>
-                        <button class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300 whitespace-nowrap" data-filter="income">Pemasukan</button>
-                        <button class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300 whitespace-nowrap" data-filter="expense">Pengeluaran</button>
-                        <button class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300 whitespace-nowrap" data-filter="transfer">Transfer</button>
+                        <button class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300 whitespace-nowrap" data-filter="all" data-i18n="all">Semua</button>
+                        <button class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300 whitespace-nowrap" data-filter="income" data-i18n="income">Pemasukan</button>
+                        <button class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300 whitespace-nowrap" data-filter="expense" data-i18n="expense">Pengeluaran</button>
+                        <button class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-all duration-300 whitespace-nowrap" data-filter="transfer" data-i18n="transfer">Transfer</button>
                     </div>
                     
                     <div class="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent mx-1 hidden md:block"></div>
 
                     <div class="toolbar-item flex-shrink-0">
-                        <button id="reset-filter-btn" class="p-2.5 bg-white/50 dark:bg-slate-700/50 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 rounded-xl transition-all hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm border border-transparent hover:border-red-200 dark:hover:border-red-800/30 group/reset" title="Reset Filter">
+                        <button id="reset-filter-btn" class="p-2.5 bg-white/50 dark:bg-slate-700/50 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 rounded-xl transition-all hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm border border-transparent hover:border-red-200 dark:hover:border-red-800/30 group/reset" title="Reset Filter" data-i18n-title="resetFilter">
                             <i data-lucide="rotate-ccw" class="w-5 h-5 group-hover/reset:-rotate-180 transition-transform duration-500 ease-spring"></i>
                         </button>
                     </div>
@@ -255,32 +254,53 @@
         <!-- Settings View -->
         <section id="view-settings" class="view-section hidden">
             <h2 class="text-2xl font-bold mb-6" data-i18n="settings">Pengaturan</h2>
-            <div class="space-y-4">
+            <div class="space-y-6">
                 <!-- App Description -->
-                <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                    <h3 class="font-bold text-blue-900 dark:text-blue-300 mb-2">Atur Duit App</h3>
-                    <p class="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">Aplikasi manajemen keuangan pribadi untuk membantu mengelola pengeluaran, pemasukan, dan tujuan finansial dengan mudah dan efisien.</p>
-                    <p class="text-xs text-blue-700 dark:text-blue-400 mt-2">© 2026 by alfathaannn</p>
+                <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-center">
+                    <h3 class="font-bold text-blue-900 dark:text-blue-300 mb-2" data-i18n="appTitle">Aturduit App</h3>
+                    <p class="text-sm text-blue-800 dark:text-blue-300 leading-relaxed max-w-2xl mx-auto" data-i18n="appDesc">Aplikasi manajemen keuangan pribadi untuk membantu mengelola pengeluaran, pemasukan, dan tujuan finansial dengan mudah dan efisien.</p>
+                    <p class="text-xs text-blue-700 dark:text-blue-400 mt-2" data-i18n="copyright">© 2026 by alfathaannn</p>
                 </div>
 
-                <!-- Export Data -->
-                <button id="export-json-btn" class="w-full text-left p-4 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 hover:bg-green-100 border border-transparent hover:border-green-200 transition-all">
-                    <span class="font-bold block flex items-center gap-2"><i data-lucide="download" class="w-5 h-5"></i>Export Data (JSON)</span>
-                    <span class="text-sm opacity-80">Unduh data keuangan Anda dalam format JSON</span>
-                </button>
+                <!-- Action Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- Export Card -->
+                    <div id="export-json-btn" class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-full">
+                        <div class="p-4 bg-green-50 dark:bg-green-900/20 text-green-600 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="download" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2" data-i18n="backupTitle">Backup Data</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed" data-i18n="backupDesc">
+                            Unduh seluruh data keuangan Anda dalam format JSON untuk keperluan cadangan atau pemindahan perangkat.
+                        </p>
+                    </div>
 
-                <!-- Import Data -->
-                <div class="p-4 rounded-xl bg-white dark:bg-slate-800 border dark:border-slate-700">
-                    <label class="block text-sm font-medium mb-2 flex items-center gap-2" data-i18n="importData"><i data-lucide="upload" class="w-5 h-5"></i>Import Data (JSON)</label>
-                    <input type="file" id="import-json-input" accept=".json" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Pilih file JSON yang sebelumnya diekspor</p>
+                    <!-- Import Card -->
+                    <div id="import-trigger-card" class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-full">
+                        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="upload" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2" data-i18n="restoreTitle">Pulihkan Data</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed" data-i18n="restoreDesc">
+                            Kembalikan data keuangan Anda dari file cadangan JSON yang valid. Tindakan ini akan menggabungkan data.
+                        </p>
+                        <!-- Hidden Input -->
+                        <input type="file" id="import-json-input" accept=".json" class="hidden"/>
+                    </div>
+
+                    <!-- Reset Card -->
+                    <div id="reset-data-btn" class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-red-200 dark:hover:border-red-900/30 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-full">
+                        <div class="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-full mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="trash-2" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-red-600 dark:text-red-400 mb-2" data-i18n="resetTitle">Reset Aplikasi</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed" data-i18n="resetDesc">
+                            Hapus seluruh data transaksi, kantong, dan pengaturan secara permanen. Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                    </div>
+
                 </div>
-
-                <!-- Reset Data -->
-                <button id="reset-data-btn" class="w-full text-left p-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 border border-transparent hover:border-red-200 transition-all">
-                    <span class="font-bold block flex items-center gap-2"><i data-lucide="trash-2" class="w-5 h-5"></i>Reset Data</span>
-                    <span class="text-sm opacity-80" data-i18n="resetDesc">Hapus semua data dan mulai dari awal (Danger Zone)</span>
-                </button>
             </div>
         </section>
 
@@ -306,6 +326,20 @@
                         <button type="button" data-type="income" class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors bg-white dark:bg-slate-700 shadow-sm text-green-600" data-i18n="income">Pemasukan</button>
                         <button type="button" data-type="expense" class="flex-1 py-2 rounded-lg text-sm font-medium transition-colors text-gray-500 dark:text-gray-400 hover:text-red-500" data-i18n="expense">Pengeluaran</button>
                     </div>
+                </div>
+
+                <div id="transaction-date-container">
+                     <label class="block text-sm font-medium mb-1" data-i18n="pickDate">Tanggal</label>
+                     <div class="relative">
+                        <button type="button" id="transaction-date-trigger" class="w-full relative py-3 px-4 flex items-center justify-between border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:text-gray-400 bg-gray-50 text-gray-500 hover:text-blue-600 group transition-all">
+                            <span id="transaction-date-text" class="truncate" data-i18n="today">Hari Ini</span>
+                            <div class="opacity-50 group-hover:opacity-100 transition-opacity">
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                            </div>
+                        </button>
+                        <input type="hidden" id="transaction-date-value">
+                        <div id="transaction-date-popup" class="absolute z-50 left-0 hidden mt-1 shadow-2xl rounded-2xl overflow-hidden min-w-[280px] bg-blue-600/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 ring-1 ring-black/5"></div>
+                     </div>
                 </div>
 
                 <div>
@@ -343,7 +377,7 @@
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl h-[80vh] flex flex-col">
             <div class="flex justify-between items-start mb-6">
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">Kantong Detail</h3>
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase" data-i18n="pocketDetail">Kantong Detail</h3>
                     <h2 id="detail-pocket-name" class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600">Pocket Name</h2>
                     <p id="detail-pocket-balance" class="text-xl font-bold mt-1 text-slate-800 dark:text-white">Rp 0</p>
                 </div>
@@ -353,18 +387,18 @@
             <div class="flex gap-2 mb-6">
                 <button id="btn-detail-allocate" class="flex-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 py-3 rounded-xl font-bold text-sm hover:bg-green-200 transition-colors flex items-center justify-center gap-2">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                    <span>Isi Saldo</span>
+                    <span data-i18n="fillBalance">Isi Saldo</span>
                 </button>
                 <button id="btn-detail-edit" class="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-gray-200 py-3 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors flex items-center justify-center gap-2">
                     <i data-lucide="edit-3" class="w-4 h-4"></i>
-                    <span>Ubah Nama</span>
+                    <span data-i18n="changeName">Ubah Nama</span>
                 </button>
                 <button id="btn-detail-delete" class="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
                     <i data-lucide="trash-2" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <h4 class="font-bold mb-3">Riwayat Transaksi</h4>
+            <h4 class="font-bold mb-3" data-i18n="history">Riwayat Transaksi</h4>
             <div id="detail-transaction-list" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                 <!-- Transactions injected here -->
             </div>
@@ -375,16 +409,16 @@
     <div id="modal-add-pocket" class="hidden fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl transform transition-all scale-100">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Buat Kantong</h3>
+                <h3 class="text-xl font-bold" data-i18n="addPocket">Buat Kantong</h3>
                 <button class="modal-close p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <form id="add-pocket-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Nama Kantong</label>
+                    <label class="block text-sm font-medium mb-1" data-i18n="pocketName">Nama Kantong</label>
                     <input type="text" id="pocket-name-input" required class="w-full bg-gray-50 dark:bg-slate-900 border-0 rounded-xl p-3 focus:ring-2 focus:ring-blue-500" placeholder="Contoh: Liburan">
                 </div>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors">
-                    <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i> Buat Sekarang
+                    <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i> <span data-i18n="createNow">Buat Sekarang</span>
                 </button>
             </form>
         </div>
@@ -395,7 +429,7 @@
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl transform transition-all scale-100">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h3 class="text-xl font-bold">Isi Saldo</h3>
+                    <h3 class="text-xl font-bold" data-i18n="fillBalance">Isi Saldo</h3>
                     <p id="allocate-pocket-name" class="text-sm text-gray-500">Target: -</p>
                     <p id="allocate-main-balance" class="text-xs font-bold text-blue-600 mt-1">Saldo Utama: -</p>
                 </div>
@@ -404,13 +438,13 @@
             <form id="allocate-form" class="space-y-4">
                 <input type="hidden" id="allocate-pocket-id">
                 <div>
-                    <label class="block text-sm font-medium mb-1">Jumlah Alokasi</label>
+                    <label class="block text-sm font-medium mb-1" data-i18n="allocationAmount">Jumlah Alokasi</label>
                     <div class="relative">
                         <span class="absolute left-3 top-3 text-gray-400">Rp</span>
                         <input type="number" id="allocate-amount" required class="w-full bg-gray-50 dark:bg-slate-900 border-0 rounded-xl p-3 pl-10 text-lg font-bold focus:ring-2 focus:ring-green-500 placeholder-gray-300" placeholder="0">
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors">
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors" data-i18n="transferBalance">
                     Transfer Saldo
                 </button>
             </form>
@@ -422,8 +456,8 @@
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl transform transition-all scale-100">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h3 class="text-xl font-bold">Export Laporan</h3>
-                    <p class="text-sm text-gray-500">Pilih rentang tanggal</p>
+                    <h3 class="text-xl font-bold" data-i18n="exportReport">Export Laporan</h3>
+                    <p class="text-sm text-gray-500" data-i18n="val_dateRange">Pilih rentang tanggal</p>
                 </div>
                 <button class="modal-close p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
@@ -431,10 +465,10 @@
                 <div class="grid grid-cols-2 gap-4">
                     <!-- Start Date -->
                     <div>
-                         <label class="block text-sm font-medium mb-1">Dari Tanggal</label>
+                         <label class="block text-sm font-medium mb-1" data-i18n="startDate">Dari Tanggal</label>
                          <div class="relative">
                             <button type="button" id="export-start-trigger" class="w-full relative py-3 px-4 flex items-center justify-between border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:text-gray-400 bg-gray-50 text-gray-500 hover:text-blue-600 group transition-all">
-                                <span id="export-start-text" class="truncate">Pilih Tanggal</span>
+                                <span id="export-start-text" class="truncate" data-i18n="pickDate">Pilih Tanggal</span>
                                 <div class="opacity-50 group-hover:opacity-100 transition-opacity">
                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
                                 </div>
@@ -445,10 +479,10 @@
                     </div>
                     <!-- End Date -->
                     <div>
-                         <label class="block text-sm font-medium mb-1">Sampai Tanggal</label>
+                         <label class="block text-sm font-medium mb-1" data-i18n="endDate">Sampai Tanggal</label>
                          <div class="relative">
                             <button type="button" id="export-end-trigger" class="w-full relative py-3 px-4 flex items-center justify-between border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:border-blue-500 focus:ring-blue-500 dark:bg-slate-900 dark:text-gray-400 bg-gray-50 text-gray-500 hover:text-blue-600 group transition-all">
-                                <span id="export-end-text" class="truncate">Pilih Tanggal</span>
+                                <span id="export-end-text" class="truncate" data-i18n="pickDate">Pilih Tanggal</span>
                                 <div class="opacity-50 group-hover:opacity-100 transition-opacity">
                                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
                                 </div>
@@ -461,7 +495,7 @@
                 <div class="pt-2">
                     <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
                         <i data-lucide="file-down" class="w-4 h-4"></i>
-                        Download PDF
+                        <span data-i18n="downloadPDF">Download PDF</span>
                     </button>
                 </div>
             </form>
@@ -469,9 +503,9 @@
     </div>
 
     <!-- Footer with Copyright -->
-    <footer class="fixed bottom-0 left-0 right-0 text-center py-2 text-xs text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+    <!-- <footer class="fixed bottom-0 left-0 right-0 text-center py-2 text-xs text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
         © 2026 Atur Duit App by alfathaannn | Manajemen Keuangan Pribadi
-    </footer>
+    </footer> -->
 
     <!-- Scripts -->
     <script type="module" src="js/app.js"></script>
