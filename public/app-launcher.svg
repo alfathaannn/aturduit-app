@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f9ff"/>
+      <stop offset="50%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+
+    <!-- Wallet Body Gradient -->
+    <linearGradient id="walletBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="40%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <!-- Wallet Flap Gradient -->
+    <linearGradient id="flapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+
+    <!-- Card 1 (Emerald Gradient) -->
+    <linearGradient id="cardEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Card 2 (Gold Gradient) -->
+    <linearGradient id="cardGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+
+    <!-- Gold Lock Accent -->
+    <linearGradient id="goldButton" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <!-- Soft Drop Shadows -->
+    <filter id="appShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#0284c7" flood-opacity="0.25"/>
+    </filter>
+
+    <filter id="walletShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#0369a1" flood-opacity="0.35"/>
+    </filter>
+
+    <filter id="claspShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="-4" dy="6" stdDeviation="6" flood-color="#0c4a6e" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- App Icon Base Squircle (Conforms to Android & iOS Adaptive Shapes) -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bgGrad)" filter="url(#appShadow)"/>
+
+  <!-- Subtle Inner Border Highlight -->
+  <rect x="18" y="18" width="476" height="476" rx="110" fill="none" stroke="#ffffff" stroke-width="4" stroke-opacity="0.8"/>
+
+  <!-- === WALLET & CARDS GROUP === -->
+  <g filter="url(#walletShadow)">
+    <!-- Card 2: Emerald Green (Back) -->
+    <rect x="120" y="110" width="220" height="120" rx="20" fill="url(#cardEmerald)" transform="rotate(-6 120 110)"/>
+
+    <!-- Card 1: Gold / Amber (Front) -->
+    <rect x="150" y="105" width="230" height="120" rx="20" fill="url(#cardGold)" transform="rotate(4 150 105)"/>
+    <!-- Card Chip -->
+    <rect x="180" y="125" width="36" height="26" rx="6" fill="#78350f" opacity="0.3" transform="rotate(4 150 105)"/>
+
+    <!-- Main Wallet Body -->
+    <rect x="76" y="165" width="360" height="245" rx="44" fill="url(#walletBody)"/>
+
+    <!-- Decorative Top Edge Highlight -->
+    <path d="M76 209 C76 185 95 165 120 165 L392 165 C417 165 436 185 436 209" fill="none" stroke="#ffffff" stroke-width="4" stroke-opacity="0.4"/>
+
+    <!-- Stitching / Seam Groove Line -->
+    <path d="M76 245 Q256 255 436 245" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-dasharray="10 8" stroke-opacity="0.5"/>
+    
+    <!-- Wallet Pocket Flap / Clasp -->
+    <g filter="url(#claspShadow)">
+      <path d="M280 230 L425 230 C436 230 445 239 445 250 L445 320 C445 331 436 340 425 340 L280 340 C264 340 250 326 250 310 L250 260 C250 244 264 230 280 230 Z" fill="url(#flapGrad)"/>
+      <path d="M280 230 L425 230" fill="none" stroke="#ffffff" stroke-width="3" stroke-opacity="0.3"/>
+      
+      <!-- Gold Button / Lock Clasp -->
+      <circle cx="355" cy="285" r="26" fill="url(#goldButton)" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.6"/>
+      <!-- Inner Lock Core -->
+      <circle cx="355" cy="285" r="14" fill="#d97706"/>
+      <rect x="352" y="278" width="6" height="14" rx="3" fill="#ffffff" opacity="0.8"/>
+    </g>
+  </g>
+</svg>
+
