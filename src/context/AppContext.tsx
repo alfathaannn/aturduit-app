@@ -69,12 +69,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [state]);
 
-  // Sync Dark Mode class to <html>
+  // Sync Dark Mode class to <html> & Status Bar meta tags for Android / Webview / iOS
   useEffect(() => {
-    if (state.settings.darkMode) {
+    const isDark = state.settings.darkMode;
+    if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+    }
+
+    // Dynamic theme-color meta tag for Android / Nativefy Webview status bar contrast
+    const themeColor = isDark ? '#191d24' : '#eef2f6';
+    let metaTheme = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    if (!metaTheme) {
+      metaTheme = document.createElement('meta');
+      metaTheme.setAttribute('name', 'theme-color');
+      document.head.appendChild(metaTheme);
+    }
+    metaTheme.setAttribute('content', themeColor);
+
+    // Dynamic Apple status bar style (default = dark icons on light bg; black-translucent = white icons on dark bg)
+    let metaApple = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]') as HTMLMetaElement | null;
+    if (metaApple) {
+      metaApple.setAttribute('content', isDark ? 'black-translucent' : 'default');
     }
   }, [state.settings.darkMode]);
 

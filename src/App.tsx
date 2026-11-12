@@ -76,7 +76,7 @@ export const App: React.FC = () => {
       <Navbar />
 
       {/* Main Content Area with Page Transition Animation */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-28 relative z-10">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 main-safe-top pb-28 relative z-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

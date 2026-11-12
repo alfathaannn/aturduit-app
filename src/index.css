@@ -127,3 +127,22 @@
 .dark ::-webkit-scrollbar-thumb {
   background: #334155;
 }
+
+/* Safe Area Insets for Mobile Webview / Notch / Status Bar */
+.navbar-safe-top {
+  top: max(2.75rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
+}
+@media (min-width: 640px) {
+  .navbar-safe-top {
+    top: 1rem;
+  }
+}
+
+.main-safe-top {
+  padding-top: max(7.25rem, calc(env(safe-area-inset-top, 0px) + 5.25rem));
+}
+@media (min-width: 640px) {
+  .main-safe-top {
+    padding-top: 6rem;
+  }
+}
