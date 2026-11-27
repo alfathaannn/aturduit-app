@@ -146,3 +146,154 @@
     padding-top: 6rem;
   }
 }
+
+/* ========================================================
+   UNIFIED NEOMORPHISM POPUPS & NOTIFICATIONS (SweetAlert2)
+   ======================================================== */
+.swal2-container {
+  z-index: 9999 !important;
+  padding: 1rem !important;
+}
+
+.swal2-container.swal2-backdrop-show {
+  background: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* Safe-area spacing for top-end toast notifications on Mobile / WebView */
+.swal2-container.swal2-top-end,
+.swal2-container.swal2-top {
+  padding-top: max(3rem, calc(env(safe-area-inset-top, 0px) + 1rem)) !important;
+  justify-items: center !important;
+}
+@media (min-width: 640px) {
+  .swal2-container.swal2-top-end,
+  .swal2-container.swal2-top {
+    padding-top: 1.25rem !important;
+  }
+  .swal2-container.swal2-top-end {
+    justify-items: end !important;
+  }
+}
+
+/* Modal Popups - Matches rounded-[32px] neu-flat cards */
+.swal2-popup:not(.swal2-toast) {
+  border-radius: 32px !important;
+  background: #eef2f6 !important;
+  color: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 8px 8px 18px rgba(15, 23, 42, 0.08) !important;
+  padding: 1.75rem !important;
+  width: min(100%, 26rem) !important;
+}
+
+.dark .swal2-popup:not(.swal2-toast) {
+  background: #191d24 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.65) !important;
+}
+
+/* Toast Notifications - Sleek Dynamic Island Capsule Pill */
+.swal2-popup.swal2-toast {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0.65rem !important;
+  width: auto !important;
+  max-width: calc(100vw - 2rem) !important;
+  border-radius: 9999px !important;
+  background: #eef2f6 !important;
+  color: #1e293b !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.16), 4px 4px 12px #d1d9e6 !important;
+  padding: 0.6rem 1.25rem 0.6rem 0.85rem !important;
+}
+
+.dark .swal2-popup.swal2-toast {
+  background: #191d24 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 4px 4px 12px #0f1217 !important;
+}
+
+.swal2-title {
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: inherit !important;
+  line-height: 1.35 !important;
+}
+
+.swal2-popup.swal2-toast .swal2-title {
+  font-size: 0.8125rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-self: center !important;
+  line-height: 1.3 !important;
+  text-align: left !important;
+}
+
+.swal2-popup.swal2-toast .swal2-html-container:empty,
+.swal2-popup.swal2-toast .swal2-actions:empty,
+.swal2-popup.swal2-toast .swal2-footer:empty,
+.swal2-popup.swal2-toast .swal2-timer-progress-bar-container {
+  display: none !important;
+}
+
+.swal2-html-container {
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  line-height: 1.5 !important;
+  margin-top: 0.5rem !important;
+}
+
+.dark .swal2-html-container {
+  color: #94a3b8 !important;
+}
+
+/* Action Buttons - Matches rounded-2xl modal buttons */
+.swal2-actions {
+  gap: 0.65rem !important;
+  margin-top: 1.25rem !important;
+  width: 100% !important;
+}
+
+.swal2-styled {
+  border-radius: 16px !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  padding: 0.7rem 1.25rem !important;
+  box-shadow: none !important;
+  transition: transform 0.15s ease, opacity 0.15s ease !important;
+  margin: 0 !important;
+}
+
+.swal2-styled:active {
+  transform: scale(0.97) !important;
+}
+
+.swal2-styled:focus {
+  box-shadow: none !important;
+}
+
+.swal2-icon {
+  margin: 0.5rem auto 0.75rem !important;
+  transform: scale(0.85);
+}
+
+.swal2-popup.swal2-toast .swal2-icon {
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  align-self: center !important;
+  transform: scale(0.75) !important;
+}
+
+.swal2-popup.swal2-toast .swal2-success-circular-line-left,
+.swal2-popup.swal2-toast .swal2-success-circular-line-right,
+.swal2-popup.swal2-toast .swal2-success-fix {
+  background-color: transparent !important;
+}

@@ -50,3 +50,16 @@ npm run build
 ---
 
 © 2026 by alfathaannn &bull; Manajemen Keuangan Pribadi
+
+
+Revisi Aturduit APP, 
+- Void/Cancel transaksi //
+- Tampilan halaman pocket //
+- Tampilan halaman history //
+- Tampilan halaman settings //
+- Tampilan chart cash flow //
+- Tampilan Recent Transactions  //
+- Ganti Modal to Sheet //
+- Tambahkan Sequence pocket //
+- Default saat select pocket //
+- Button Transfer di dalam pocket seperti button Topup di dalam pocket //

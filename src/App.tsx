@@ -16,6 +16,7 @@ import { PocketModal } from './components/modals/PocketModal';
 import { AllocateModal } from './components/modals/AllocateModal';
 import { ExportPdfModal } from './components/modals/ExportPdfModal';
 import { PocketDetailModal } from './components/modals/PocketDetailModal';
+import { TransferPocketSheet } from './components/modals/TransferPocketSheet';
 
 export const App: React.FC = () => {
   const { state } = useApp();
@@ -46,6 +47,13 @@ export const App: React.FC = () => {
     isOpen: false,
   });
 
+  const [transferSheet, setTransferSheet] = useState<{
+    isOpen: boolean;
+    pocketId?: string;
+  }>({
+    isOpen: false,
+  });
+
   const [isExportPdfOpen, setIsExportPdfOpen] = useState(false);
   const [detailPocket, setDetailPocket] = useState<Pocket | null>(null);
 
@@ -63,6 +71,10 @@ export const App: React.FC = () => {
 
   const handleOpenAllocate = (pocketId?: string) => {
     setAllocateModal({ isOpen: true, pocketId });
+  };
+
+  const handleOpenTransfer = (pocketId: string) => {
+    setTransferSheet({ isOpen: true, pocketId });
   };
 
   return (
@@ -152,6 +164,13 @@ export const App: React.FC = () => {
         pocket={detailPocket}
         onEdit={handleEditPocket}
         onAllocate={handleOpenAllocate}
+        onTransfer={handleOpenTransfer}
+      />
+
+      <TransferPocketSheet
+        isOpen={transferSheet.isOpen}
+        onClose={() => setTransferSheet({ isOpen: false })}
+        sourcePocketId={transferSheet.pocketId}
       />
     </div>
   );

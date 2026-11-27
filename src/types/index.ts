@@ -16,7 +16,9 @@ export interface Transaction {
   type: TransactionType;
   amount: number;
   pocketId?: string;
-  recurring?: boolean;
+  sourcePocketId?: string;
+  voided?: boolean;
+  voidedAt?: string;
 }
 
 export interface AppSettings {

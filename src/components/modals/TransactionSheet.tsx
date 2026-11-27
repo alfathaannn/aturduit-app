@@ -9,10 +9,9 @@ import {
 } from 'hugeicons-react';
 import { useApp } from '../../context/AppContext';
 import { formatCurrency } from '../../utils/formatters';
-import { getTranslation } from '../../utils/translations';
+import { getTranslation, translations } from '../../utils/translations';
 import { CustomSelect } from '../ui/CustomSelect';
 import { CustomDatePicker } from '../ui/CustomDatePicker';
-import { CustomCheckbox } from '../ui/CustomCheckbox';
 import Swal from 'sweetalert2';
 
 interface TransactionSheetProps {
@@ -36,20 +35,18 @@ export const TransactionSheet: React.FC<TransactionSheetProps> = ({
   const [description, setDescription] = useState<string>('');
   const [pocketId, setPocketId] = useState<string>(defaultPocketId);
   const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [isRecurring, setIsRecurring] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
     if (isOpen) {
       setType(defaultType);
-      setPocketId(defaultPocketId || (state.pockets[0]?.id ?? ''));
+      setPocketId(defaultPocketId || '');
       setAmount('');
       setDescription('');
       setDate(new Date().toISOString().slice(0, 10));
-      setIsRecurring(false);
       setError('');
     }
-  }, [isOpen, defaultType, defaultPocketId, state.pockets]);
+  }, [isOpen, defaultType, defaultPocketId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,13 +65,22 @@ export const TransactionSheet: React.FC<TransactionSheetProps> = ({
 
     try {
       if (type === 'income') {
-        addIncome(numericAmount, description, isRecurring, date);
+        addIncome(numericAmount, description, date);
       } else {
         if (!pocketId) {
           setError(getTranslation(lang, 'pocketRequiredForExpense'));
           return;
         }
-        addExpense(numericAmount, description, pocketId, isRecurring, date);
+        if (selectedPocket && numericAmount > selectedPocket.balance) {
+          setError(
+            translations[lang].insufficientPocketBalance(
+              selectedPocket.name,
+              formatCurrency(selectedPocket.balance)
+            )
+          );
+          return;
+        }
+        addExpense(numericAmount, description, pocketId, date);
       }
 
       Swal.fire({
@@ -91,11 +97,6 @@ export const TransactionSheet: React.FC<TransactionSheetProps> = ({
       const msg = err instanceof Error ? err.message : 'Error';
       setError(msg);
     }
-  };
-
-  const handleQuickAdd = (preset: number) => {
-    const current = parseFloat(amount.replace(/[^0-9]/g, '')) || 0;
-    setAmount((current + preset).toString());
   };
 
   const selectedPocket = state.pockets.find((p) => p.id === pocketId);
@@ -249,20 +250,6 @@ export const TransactionSheet: React.FC<TransactionSheetProps> = ({
                     </p>
                   )}
                 </div>
-
-                {/* Quick Add Presets */}
-                <div className="flex gap-2 flex-wrap mt-2.5">
-                  {[20000, 50000, 100000, 500000].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => handleQuickAdd(preset)}
-                      className="px-3 py-1.5 rounded-xl neu-button text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 transition"
-                    >
-                      +{formatCurrency(preset)}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               {/* Description */}
@@ -314,27 +301,17 @@ export const TransactionSheet: React.FC<TransactionSheetProps> = ({
                 </div>
               )}
 
-              {/* Custom Datepicker & Custom Checkbox Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div>
-                  <label className="block mb-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">
-                    {getTranslation(lang, 'date')}
-                  </label>
-                  <CustomDatePicker
-                    value={date}
-                    onChange={(newDate) => setDate(newDate)}
-                    lang={lang}
-                    dropUp
-                  />
-                </div>
-
-                <div className="flex items-center p-3 rounded-2xl neu-pressed mt-auto h-[46px]">
-                  <CustomCheckbox
-                    checked={isRecurring}
-                    onChange={setIsRecurring}
-                    label={getTranslation(lang, 'isRecurring')}
-                  />
-                </div>
+              {/* Custom Datepicker */}
+              <div className="pt-1">
+                <label className="block mb-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">
+                  {getTranslation(lang, 'date')}
+                </label>
+                <CustomDatePicker
+                  value={date}
+                  onChange={(newDate) => setDate(newDate)}
+                  lang={lang}
+                  dropUp
+                />
               </div>
 
               {/* Action Buttons */}

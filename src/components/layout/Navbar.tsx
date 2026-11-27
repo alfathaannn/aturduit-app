@@ -46,10 +46,10 @@ export const Navbar: React.FC = () => {
               <Wallet01Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </div>
             <div className="min-w-0">
-              <h1 className="font-black text-xs sm:text-sm leading-tight bg-gradient-to-r from-slate-900 via-sky-900 to-sky-600 dark:from-white dark:via-sky-200 dark:to-sky-400 bg-clip-text text-transparent truncate">
+              <h1 className="font-black text-xs sm:text-sm leading-tight bg-gradient-to-r from-slate-900 via-sky-900 to-sky-600 dark:from-white dark:via-sky-200 dark:to-sky-400 bg-clip-text text-transparent">
                 {getTranslation(lang, 'appTitle')}
               </h1>
-              <p className="text-[10px] sm:text-[11px] text-slate-400 font-semibold truncate leading-none mt-0.5">
+              <p className="text-[10px] sm:text-[11px] text-slate-400 font-semibold leading-none mt-0.5 whitespace-nowrap">
                 {currentTime || getTranslation(lang, 'currentDate')}
               </p>
             </div>

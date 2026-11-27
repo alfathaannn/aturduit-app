@@ -65,7 +65,6 @@ export const NotepadView: React.FC = () => {
               {getTranslation(lang, 'notepadTitle')}
             </h2>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs text-slate-400 font-semibold">
                 {saveStatus === 'saving'
                   ? getTranslation(lang, 'saving')
@@ -108,11 +107,7 @@ export const NotepadView: React.FC = () => {
 
         {/* Footer Stats */}
         <div className="pt-4 mt-3 border-t border-slate-200/50 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-400 font-semibold">
-          <span>{wordCount} {getTranslation(lang, 'wordsCount')} &bull; {charCount} {getTranslation(lang, 'charactersCount')}</span>
-          <span className="flex items-center gap-1 text-sky-600 dark:text-sky-400 font-bold px-3 py-1 rounded-full neu-pressed">
-            <CheckmarkCircle02Icon className="w-3.5 h-3.5" />
-            {getTranslation(lang, 'storageSynced')}
-          </span>
+          <span>{getTranslation(lang, 'storageSynced')}</span>
         </div>
       </div>
     </div>

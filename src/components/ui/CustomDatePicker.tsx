@@ -158,9 +158,9 @@ export const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
         onClick={() => setIsOpen((prev) => !prev)}
         className="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl neu-pressed text-left cursor-pointer transition-all"
       >
-        <div className="flex items-center gap-2 truncate">
+        <div className="flex items-center gap-2">
           <Calendar01Icon className="w-4 h-4 text-sky-500 flex-shrink-0" />
-          <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
+          <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">
             {value ? formatShortDate(value, lang) : placeholder}
           </span>
         </div>

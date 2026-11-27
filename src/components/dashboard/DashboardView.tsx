@@ -12,11 +12,12 @@ import {
   ArrowDown01Icon,
 } from 'hugeicons-react';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, formatDate, formatShortDate } from '../../utils/formatters';
+import { formatCurrency, formatShortDate } from '../../utils/formatters';
 import { getTranslation } from '../../utils/translations';
 import { CashflowChart } from './CashflowChart';
-import { ActiveTab, CashflowFilterConfig } from '../../types';
+import { ActiveTab, CashflowFilterConfig, Transaction } from '../../types';
 import { CashflowFilterModal } from '../modals/CashflowFilterModal';
+import { TransactionActionModal } from '../modals/TransactionActionModal';
 
 interface DashboardViewProps {
   onOpenTransaction: (type: 'income' | 'expense') => void;
@@ -31,12 +32,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onOpenAddPocket,
   onNavigateTab,
 }) => {
-  const { state, totalGlobalBalance, totalPocketsBalance, stats } = useApp();
+  const { state, totalGlobalBalance, totalPocketsBalance, stats, voidTransaction } = useApp();
   const lang = state.settings.language;
   const isDark = state.settings.darkMode;
 
   const [cashflowFilter, setCashflowFilter] = useState<CashflowFilterConfig>({ type: '6months' });
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
   const recentTransactions = state.transactions.slice(0, 5);
 
@@ -155,28 +157,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* Simplified Management Actions (Aksi Cepat text taken out!) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Simplified Management Actions (Side-by-side on mobile & desktop) */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
         <button
           onClick={onOpenAllocate}
-          className="flex items-center justify-center gap-2.5 p-3.5 rounded-2xl neu-button text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition"
+          className="flex items-center justify-center gap-2 px-2.5 py-3 sm:p-3.5 rounded-2xl neu-button text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition active:scale-[0.98]"
         >
-          <div className="w-8 h-8 rounded-xl neu-pressed flex items-center justify-center text-blue-500">
-            <Exchange01Icon className="w-4 h-4" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl neu-pressed flex items-center justify-center text-blue-500 flex-shrink-0">
+            <Exchange01Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-          <span className="text-xs font-bold">
+          <span className="text-[11px] sm:text-xs font-bold leading-tight text-left">
             {getTranslation(lang, 'transferToPocket')}
           </span>
         </button>
 
         <button
           onClick={onOpenAddPocket}
-          className="flex items-center justify-center gap-2.5 p-3.5 rounded-2xl neu-button text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 transition"
+          className="flex items-center justify-center gap-2 px-2.5 py-3 sm:p-3.5 rounded-2xl neu-button text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 transition active:scale-[0.98]"
         >
-          <div className="w-8 h-8 rounded-xl neu-pressed flex items-center justify-center text-sky-500">
-            <FolderAddIcon className="w-4 h-4" />
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl neu-pressed flex items-center justify-center text-sky-500 flex-shrink-0">
+            <FolderAddIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-          <span className="text-xs font-bold">
+          <span className="text-[11px] sm:text-xs font-bold leading-tight text-left">
             {getTranslation(lang, 'addPocket')}
           </span>
         </button>
@@ -217,9 +219,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         onApply={setCashflowFilter}
       />
 
-      {/* Recent Transactions List (Neomorphic Card) */}
-      <div className="p-5 sm:p-6 rounded-[32px] neu-flat border border-white/60 dark:border-white/5">
-        <div className="flex items-center justify-between mb-4">
+      {/* Recent Transactions List (Clean Mobile-First Divided Card) */}
+      <div className="rounded-[28px] sm:rounded-[32px] neu-flat border border-white/60 dark:border-white/5 overflow-hidden">
+        <div className="flex items-center justify-between px-5 pt-5 pb-3 sm:px-6 sm:pt-6">
           <h3 className="text-sm font-bold text-slate-800 dark:text-white">
             {getTranslation(lang, 'recentTransactions')}
           </h3>
@@ -233,7 +235,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {recentTransactions.length === 0 ? (
-          <div className="text-center py-8">
+          <div className="text-center py-8 px-5">
             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
               {getTranslation(lang, 'noTransactionsYet')}
             </p>
@@ -242,20 +244,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="divide-y divide-slate-200/60 dark:divide-slate-800/60 pb-2">
             {recentTransactions.map((tx) => {
               const isIncome = tx.type === 'income' || tx.type === 'transfer_in';
               const isExpense = tx.type === 'expense';
+              const pocketName = tx.pocketId
+                ? state.pockets.find((p) => p.id === tx.pocketId)?.name
+                : null;
 
               return (
                 <div
                   key={tx.id}
-                  className="flex items-center justify-between p-3.5 rounded-2xl neu-flat-sm hover:neu-pressed transition-all"
+                  onClick={() => setSelectedTx(tx)}
+                  className={`flex items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5 transition-colors cursor-pointer active:bg-slate-200/40 dark:active:bg-slate-800/40 ${
+                    tx.voided ? 'opacity-60' : 'hover:bg-white/30 dark:hover:bg-white/[0.02]'
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div
-                      className={`w-10 h-10 rounded-xl neu-pressed flex items-center justify-center flex-shrink-0 ${
-                        isIncome
+                      className={`w-9 h-9 rounded-xl neu-pressed flex items-center justify-center flex-shrink-0 ${
+                        tx.voided
+                          ? 'text-slate-400'
+                          : isIncome
                           ? 'text-emerald-500'
                           : isExpense
                           ? 'text-red-500'
@@ -263,40 +273,76 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       }`}
                     >
                       {isIncome ? (
-                        <ArrowDownLeft01Icon className="w-5 h-5" />
+                        <ArrowDownLeft01Icon className="w-4 h-4" />
                       ) : isExpense ? (
-                        <ArrowUpRight01Icon className="w-5 h-5" />
+                        <ArrowUpRight01Icon className="w-4 h-4" />
                       ) : (
-                        <Exchange01Icon className="w-5 h-5" />
+                        <Exchange01Icon className="w-4 h-4" />
                       )}
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">
-                        {tx.description}
-                      </p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        {formatDate(tx.date, lang)}
-                      </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p
+                          className={`text-[13px] sm:text-sm font-bold leading-snug break-words ${
+                            tx.voided
+                              ? 'line-through text-slate-400 dark:text-slate-500'
+                              : 'text-slate-800 dark:text-white'
+                          }`}
+                        >
+                          {tx.description}
+                        </p>
+                        {tx.voided && (
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full neu-pressed text-amber-600 dark:text-amber-400 flex-shrink-0">
+                            {getTranslation(lang, 'voidedBadge')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-400 font-medium flex-wrap">
+                        <span className="whitespace-nowrap">{formatShortDate(tx.date, lang)}</span>
+                        {pocketName && (
+                          <>
+                            <span>•</span>
+                            <span className="font-bold text-sky-600 dark:text-sky-400 break-words">
+                              {pocketName}
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <span
-                    className={`text-sm font-black ${
-                      isIncome
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : isExpense
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-blue-600 dark:text-blue-400'
-                    }`}
-                  >
-                    {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span
+                      className={`text-[13px] sm:text-sm font-black whitespace-nowrap ${
+                        tx.voided
+                          ? 'line-through text-slate-400 dark:text-slate-500'
+                          : isIncome
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : isExpense
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-blue-600 dark:text-blue-400'
+                      }`}
+                    >
+                      {isIncome ? '+' : '-'}{formatCurrency(tx.amount)}
+                    </span>
+                    <ArrowRight01Icon className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600" />
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </div>
+
+      {/* Transaction Action Modal (Detail & Void) */}
+      <TransactionActionModal
+        transaction={selectedTx}
+        transactions={state.transactions}
+        pockets={state.pockets}
+        lang={lang}
+        onClose={() => setSelectedTx(null)}
+        onVoid={voidTransaction}
+      />
     </div>
   );
 };

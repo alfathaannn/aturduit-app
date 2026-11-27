@@ -43,6 +43,45 @@ interface DataPoint {
   expense: number;
 }
 
+/** Converts a Date or ISO timestamp into a local YYYY-MM-DD key. */
+const toLocalDateKey = (input: Date | string): string => {
+  if (typeof input === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input)) {
+    return input;
+  }
+  const d = typeof input === 'string' ? new Date(input) : input;
+  if (isNaN(d.getTime())) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+/** Parses a YYYY-MM-DD string as a local midnight Date (avoiding UTC day-shift). */
+const parseLocalDate = (dateStr: string): Date => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+  if (match) {
+    return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  }
+  return new Date(dateStr);
+};
+
+const formatCompactAxis = (num: number): string => {
+  if (num === 0) return '0';
+  if (num >= 1_000_000_000) {
+    const val = num / 1_000_000_000;
+    return `${Number.isInteger(val) ? val : val.toFixed(1)}M`;
+  }
+  if (num >= 1_000_000) {
+    const val = num / 1_000_000;
+    return `${Number.isInteger(val) ? val : val.toFixed(1)}jt`;
+  }
+  if (num >= 1_000) {
+    const val = num / 1_000;
+    return `${Number.isInteger(val) ? val : val.toFixed(0)}rb`;
+  }
+  return num.toString();
+};
+
 export const CashflowChart: React.FC<CashflowChartProps> = ({
   transactions,
   filter = { type: '6months' },
@@ -54,240 +93,181 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
   const monthNames = lang === 'en' ? monthNamesEN : monthNamesID;
 
   const chartDataPoints = useMemo<DataPoint[]>(() => {
+    // Exclude voided transactions and internal pocket transfers so cash flow reflects true income & expenses
+    const cashflowTxs = transactions
+      .filter((t) => !t.voided && (t.type === 'income' || t.type === 'expense'))
+      .map((t) => ({ ...t, dateKey: toLocalDateKey(t.date) }))
+      .filter((t) => t.dateKey !== '');
+
     const now = new Date();
+    const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const filterType = filter.type;
 
-    // 1. Last 7 Days
+    const aggregateDaily = (start: Date, end: Date, withWeekday = false): DataPoint[] => {
+      const points: DataPoint[] = [];
+      const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      const endLocal = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+      while (cursor <= endLocal) {
+        const key = toLocalDateKey(cursor);
+        const baseLabel = `${cursor.getDate()} ${monthNames[cursor.getMonth()]}`;
+        const label = withWeekday
+          ? `${cursor.toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', { weekday: 'short' })}, ${baseLabel}`
+          : baseLabel;
+
+        let income = 0;
+        let expense = 0;
+        for (const t of cashflowTxs) {
+          if (t.dateKey === key) {
+            if (t.type === 'income') income += t.amount;
+            else if (t.type === 'expense') expense += t.amount;
+          }
+        }
+        points.push({ label, income, expense });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      return points;
+    };
+
+    const aggregateMonthly = (
+      startYear: number,
+      startMonth: number,
+      endYear: number,
+      endMonth: number,
+      minKey?: string,
+      maxKey?: string
+    ): DataPoint[] => {
+      const points: DataPoint[] = [];
+      const cursor = new Date(startYear, startMonth, 1);
+      const endCursor = new Date(endYear, endMonth, 1);
+
+      while (cursor <= endCursor) {
+        const y = cursor.getFullYear();
+        const m = cursor.getMonth();
+        const monthPrefix = `${y}-${String(m + 1).padStart(2, '0')}`;
+        const label = `${monthNames[m]} ${String(y).slice(-2)}`;
+
+        let income = 0;
+        let expense = 0;
+        for (const t of cashflowTxs) {
+          if (!t.dateKey.startsWith(monthPrefix)) continue;
+          if (minKey && t.dateKey < minKey) continue;
+          if (maxKey && t.dateKey > maxKey) continue;
+          if (t.type === 'income') income += t.amount;
+          else if (t.type === 'expense') expense += t.amount;
+        }
+
+        points.push({ label, income, expense });
+        cursor.setMonth(cursor.getMonth() + 1);
+      }
+      return points;
+    };
+
     if (filterType === '7days') {
-      const points: DataPoint[] = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(now.getDate() - i);
-        const dateStr = d.toISOString().slice(0, 10);
-
-        const weekday = d.toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', {
-          weekday: 'short',
-        });
-        const label = `${weekday}, ${d.getDate()} ${monthNames[d.getMonth()]}`;
-
-        const income = transactions
-          .filter((t) => (t.type === 'income' || t.type === 'transfer_in') && t.date === dateStr)
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        const expense = transactions
-          .filter((t) => (t.type === 'expense' || t.type === 'transfer_out') && t.date === dateStr)
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        points.push({ label, income, expense });
-      }
-      return points;
+      const start = new Date(todayLocal);
+      start.setDate(start.getDate() - 6);
+      return aggregateDaily(start, todayLocal, true);
     }
 
-    // 2. Last 1 Month (30 Days)
     if (filterType === '1month') {
-      const points: DataPoint[] = [];
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(now.getDate() - i);
-        const dateStr = d.toISOString().slice(0, 10);
-        const label = `${d.getDate()} ${monthNames[d.getMonth()]}`;
-
-        const income = transactions
-          .filter((t) => (t.type === 'income' || t.type === 'transfer_in') && t.date === dateStr)
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        const expense = transactions
-          .filter((t) => (t.type === 'expense' || t.type === 'transfer_out') && t.date === dateStr)
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        points.push({ label, income, expense });
-      }
-      return points;
+      const start = new Date(todayLocal);
+      start.setDate(start.getDate() - 29);
+      return aggregateDaily(start, todayLocal, false);
     }
 
-    // 3. Last 1 Year (12 Months)
     if (filterType === '1year') {
-      const points: DataPoint[] = [];
-      for (let i = 11; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const y = d.getFullYear();
-        const m = d.getMonth();
-        const label = `${monthNames[m]} ${y.toString().slice(-2)}`;
-
-        const income = transactions
-          .filter((t) => {
-            if (t.type !== 'income' && t.type !== 'transfer_in') return false;
-            const tDate = new Date(t.date);
-            return tDate.getFullYear() === y && tDate.getMonth() === m;
-          })
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        const expense = transactions
-          .filter((t) => {
-            if (t.type !== 'expense' && t.type !== 'transfer_out') return false;
-            const tDate = new Date(t.date);
-            return tDate.getFullYear() === y && tDate.getMonth() === m;
-          })
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        points.push({ label, income, expense });
-      }
-      return points;
+      const start = new Date(todayLocal.getFullYear(), todayLocal.getMonth() - 11, 1);
+      return aggregateMonthly(
+        start.getFullYear(),
+        start.getMonth(),
+        todayLocal.getFullYear(),
+        todayLocal.getMonth()
+      );
     }
 
-    // 4. All Time
     if (filterType === 'all') {
-      if (transactions.length === 0) {
-        // Fallback to last 6 months empty
-        return Array.from({ length: 6 }).map((_, i) => {
-          const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
-          return {
-            label: `${monthNames[d.getMonth()]} ${d.getFullYear().toString().slice(-2)}`,
-            income: 0,
-            expense: 0,
-          };
-        });
+      if (cashflowTxs.length === 0) {
+        const start = new Date(todayLocal.getFullYear(), todayLocal.getMonth() - 5, 1);
+        return aggregateMonthly(
+          start.getFullYear(),
+          start.getMonth(),
+          todayLocal.getFullYear(),
+          todayLocal.getMonth()
+        );
       }
 
-      // Sort dates
-      const sortedDates = transactions.map((t) => new Date(t.date).getTime()).sort((a, b) => a - b);
-      const earliest = new Date(sortedDates[0]);
+      const sortedKeys = cashflowTxs.map((t) => t.dateKey).sort();
+      const earliest = parseLocalDate(sortedKeys[0]);
+      const latest = parseLocalDate(sortedKeys[sortedKeys.length - 1]);
+      const endRef = latest > todayLocal ? latest : todayLocal;
+
+      const diffDays =
+        Math.round((endRef.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      if (diffDays <= 31) {
+        const start = diffDays < 7
+          ? new Date(endRef.getFullYear(), endRef.getMonth(), endRef.getDate() - 6)
+          : earliest;
+        return aggregateDaily(start, endRef, diffDays <= 7);
+      }
+
       const monthsSpan =
-        (now.getFullYear() - earliest.getFullYear()) * 12 + (now.getMonth() - earliest.getMonth()) + 1;
-      const count = Math.max(3, Math.min(monthsSpan, 36));
+        (endRef.getFullYear() - earliest.getFullYear()) * 12 +
+        (endRef.getMonth() - earliest.getMonth()) +
+        1;
+      const clampedMonths = Math.min(monthsSpan, 36);
+      const startMonth = new Date(endRef.getFullYear(), endRef.getMonth() - (clampedMonths - 1), 1);
 
-      const points: DataPoint[] = [];
-      for (let i = count - 1; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const y = d.getFullYear();
-        const m = d.getMonth();
-        const label = `${monthNames[m]} ${y.toString().slice(-2)}`;
-
-        const income = transactions
-          .filter((t) => {
-            if (t.type !== 'income' && t.type !== 'transfer_in') return false;
-            const tDate = new Date(t.date);
-            return tDate.getFullYear() === y && tDate.getMonth() === m;
-          })
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        const expense = transactions
-          .filter((t) => {
-            if (t.type !== 'expense' && t.type !== 'transfer_out') return false;
-            const tDate = new Date(t.date);
-            return tDate.getFullYear() === y && tDate.getMonth() === m;
-          })
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        points.push({ label, income, expense });
-      }
-      return points;
+      return aggregateMonthly(
+        startMonth.getFullYear(),
+        startMonth.getMonth(),
+        endRef.getFullYear(),
+        endRef.getMonth()
+      );
     }
 
-    // 5. Custom Date Range
     if (filterType === 'custom' && filter.startDate && filter.endDate) {
-      const start = new Date(filter.startDate);
-      const end = new Date(filter.endDate);
-
-      // If invalid, fallback
+      const start = parseLocalDate(filter.startDate);
+      const end = parseLocalDate(filter.endDate);
       if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) {
         return [];
       }
 
       const diffDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
-      // If <= 31 days, group by day
       if (diffDays <= 31) {
-        const points: DataPoint[] = [];
-        const current = new Date(start);
-        while (current <= end) {
-          const dateStr = current.toISOString().slice(0, 10);
-          const label = `${current.getDate()} ${monthNames[current.getMonth()]}`;
-
-          const income = transactions
-            .filter((t) => (t.type === 'income' || t.type === 'transfer_in') && t.date === dateStr)
-            .reduce((sum, t) => sum + t.amount, 0);
-
-          const expense = transactions
-            .filter((t) => (t.type === 'expense' || t.type === 'transfer_out') && t.date === dateStr)
-            .reduce((sum, t) => sum + t.amount, 0);
-
-          points.push({ label, income, expense });
-          current.setDate(current.getDate() + 1);
-        }
-        return points;
+        return aggregateDaily(start, end, diffDays <= 7);
       }
 
-      // If > 31 days, group by month
-      const points: DataPoint[] = [];
-      const current = new Date(start.getFullYear(), start.getMonth(), 1);
-      const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
-
-      while (current <= endMonth) {
-        const y = current.getFullYear();
-        const m = current.getMonth();
-        const label = `${monthNames[m]} ${y.toString().slice(-2)}`;
-
-        const income = transactions
-          .filter((t) => {
-            if (t.type !== 'income' && t.type !== 'transfer_in') return false;
-            const tDate = new Date(t.date);
-            return (
-              tDate.getFullYear() === y &&
-              tDate.getMonth() === m &&
-              t.date >= filter.startDate! &&
-              t.date <= filter.endDate!
-            );
-          })
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        const expense = transactions
-          .filter((t) => {
-            if (t.type !== 'expense' && t.type !== 'transfer_out') return false;
-            const tDate = new Date(t.date);
-            return (
-              tDate.getFullYear() === y &&
-              tDate.getMonth() === m &&
-              t.date >= filter.startDate! &&
-              t.date <= filter.endDate!
-            );
-          })
-          .reduce((sum, t) => sum + t.amount, 0);
-
-        points.push({ label, income, expense });
-        current.setMonth(current.getMonth() + 1);
-      }
-      return points;
+      return aggregateMonthly(
+        start.getFullYear(),
+        start.getMonth(),
+        end.getFullYear(),
+        end.getMonth(),
+        filter.startDate,
+        filter.endDate
+      );
     }
 
     // Default: Last 6 Months
-    const points: DataPoint[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const y = d.getFullYear();
-      const m = d.getMonth();
-      const label = `${monthNames[m]} ${y.toString().slice(-2)}`;
+    const start = new Date(todayLocal.getFullYear(), todayLocal.getMonth() - 5, 1);
+    return aggregateMonthly(
+      start.getFullYear(),
+      start.getMonth(),
+      todayLocal.getFullYear(),
+      todayLocal.getMonth()
+    );
+  }, [transactions, filter, lang, monthNames]);
 
-      const income = transactions
-        .filter((t) => {
-          if (t.type !== 'income' && t.type !== 'transfer_in') return false;
-          const tDate = new Date(t.date);
-          return tDate.getFullYear() === y && tDate.getMonth() === m;
-        })
-        .reduce((sum, t) => sum + t.amount, 0);
+  const periodTotals = useMemo(() => {
+    return chartDataPoints.reduce(
+      (acc, p) => ({
+        income: acc.income + p.income,
+        expense: acc.expense + p.expense,
+      }),
+      { income: 0, expense: 0 }
+    );
+  }, [chartDataPoints]);
 
-      const expense = transactions
-        .filter((t) => {
-          if (t.type !== 'expense' && t.type !== 'transfer_out') return false;
-          const tDate = new Date(t.date);
-          return tDate.getFullYear() === y && tDate.getMonth() === m;
-        })
-        .reduce((sum, t) => sum + t.amount, 0);
-
-      points.push({ label, income, expense });
-    }
-    return points;
-  }, [transactions, filter, lang]);
+  const manyPoints = chartDataPoints.length > 15;
 
   const data = {
     labels: chartDataPoints.map((m) => m.label),
@@ -295,23 +275,29 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
       {
         label: getTranslation(lang, 'income'),
         data: chartDataPoints.map((m) => m.income),
-        borderColor: '#10b981', // Emerald 500
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.35,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.12)',
+        borderWidth: 2.5,
+        cubicInterpolationMode: 'monotone' as const,
         fill: true,
         pointBackgroundColor: '#10b981',
-        pointRadius: chartDataPoints.length > 20 ? 2 : 4,
+        pointBorderColor: isDark ? '#191d24' : '#eef2f6',
+        pointBorderWidth: 1.5,
+        pointRadius: manyPoints ? 2 : 4,
         pointHoverRadius: 6,
       },
       {
         label: getTranslation(lang, 'expense'),
         data: chartDataPoints.map((m) => m.expense),
-        borderColor: '#ef4444', // Red 500
+        borderColor: '#ef4444',
         backgroundColor: 'rgba(239, 68, 68, 0.08)',
-        tension: 0.35,
+        borderWidth: 2.5,
+        cubicInterpolationMode: 'monotone' as const,
         fill: true,
         pointBackgroundColor: '#ef4444',
-        pointRadius: chartDataPoints.length > 20 ? 2 : 4,
+        pointBorderColor: isDark ? '#191d24' : '#eef2f6',
+        pointBorderWidth: 1.5,
+        pointRadius: manyPoints ? 2 : 4,
         pointHoverRadius: 6,
       },
     ],
@@ -320,15 +306,13 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
   const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     plugins: {
       legend: {
-        position: 'top',
-        labels: {
-          color: isDark ? '#94a3b8' : '#64748b',
-          font: { family: "'Google Sans', sans-serif", size: 12 },
-          usePointStyle: true,
-          boxWidth: 8,
-        },
+        display: false,
       },
       tooltip: {
         backgroundColor: isDark ? '#1e293b' : '#ffffff',
@@ -337,9 +321,11 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
         borderColor: isDark ? '#334155' : '#e2e8f0',
         borderWidth: 1,
         padding: 10,
-        boxPadding: 4,
-        titleFont: { family: "'Google Sans', sans-serif", weight: 'bold' },
-        bodyFont: { family: "'Google Sans', sans-serif" },
+        boxPadding: 5,
+        cornerRadius: 14,
+        usePointStyle: true,
+        titleFont: { family: "'Google Sans', sans-serif", weight: 'bold', size: 12 },
+        bodyFont: { family: "'Google Sans', sans-serif", size: 11 },
         callbacks: {
           label: (context) => {
             const val = context.raw as number;
@@ -350,37 +336,64 @@ export const CashflowChart: React.FC<CashflowChartProps> = ({
     },
     scales: {
       x: {
+        border: { display: false },
         grid: { display: false },
         ticks: {
           color: isDark ? '#64748b' : '#94a3b8',
-          font: { family: "'Google Sans', sans-serif", size: 10 },
-          maxRotation: 45,
+          font: { family: "'Google Sans', sans-serif", size: 10, weight: 600 },
+          maxRotation: 0,
           autoSkip: true,
-          maxTicksLimit: 12,
+          maxTicksLimit: 7,
         },
       },
       y: {
+        beginAtZero: true,
+        border: { display: false },
         grid: {
-          color: isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.7)',
+          color: isDark ? 'rgba(148, 163, 184, 0.08)' : 'rgba(148, 163, 184, 0.16)',
         },
         ticks: {
           color: isDark ? '#64748b' : '#94a3b8',
-          font: { family: "'Google Sans', sans-serif", size: 11 },
-          callback: (value) => {
-            const num = Number(value);
-            if (num >= 1000000000) return `${(num / 1000000000).toFixed(1)}M`;
-            if (num >= 1000000) return `${(num / 1000000).toFixed(1)}jt`;
-            if (num >= 1000) return `${(num / 1000).toFixed(0)}rb`;
-            return num.toString();
-          },
+          font: { family: "'Google Sans', sans-serif", size: 10, weight: 600 },
+          maxTicksLimit: 5,
+          padding: 8,
+          callback: (value) => formatCompactAxis(Number(value)),
         },
       },
     },
   };
 
   return (
-    <div className="w-full h-64 sm:h-72 font-sans">
-      <Line data={data} options={options} />
+    <div className="space-y-3.5 font-sans">
+      {/* Clean Period Totals Summary Pills (Replaces bulky legend) */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className="px-3 py-2 rounded-2xl neu-pressed flex items-center gap-2">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 leading-none">
+              {getTranslation(lang, 'income')}
+            </p>
+            <p className="text-xs sm:text-sm font-black text-emerald-600 dark:text-emerald-400 mt-1">
+              {formatCurrency(periodTotals.income)}
+            </p>
+          </div>
+        </div>
+
+        <div className="px-3 py-2 rounded-2xl neu-pressed flex items-center gap-2">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-slate-400 leading-none">
+              {getTranslation(lang, 'expense')}
+            </p>
+            <p className="text-xs sm:text-sm font-black text-red-600 dark:text-red-400 mt-1">
+              {formatCurrency(periodTotals.expense)}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Line Chart Canvas */}
+      <div className="w-full h-52 sm:h-64">
+        <Line data={data} options={options} />
+      </div>
     </div>
   );
 };

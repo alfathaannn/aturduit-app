@@ -45,9 +45,9 @@ export const generatePDF = (
   doc.setLineWidth(0.5);
   doc.line(14, 35, 196, 35);
 
-  // Filter Data: Income and Expense within range (or all if empty)
+  // Filter Data: Active (non-voided) Income and Expense within range (or all if empty)
   const reportData = transactions
-    .filter((t) => t.type === 'income' || t.type === 'expense')
+    .filter((t) => !t.voided && (t.type === 'income' || t.type === 'expense'))
     .filter((t) => {
       const tTime = new Date(t.date).getTime();
       const sTime = startDate ? new Date(startDate).getTime() : 0;

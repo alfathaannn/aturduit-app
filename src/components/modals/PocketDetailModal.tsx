@@ -5,12 +5,15 @@ import {
   Edit02Icon,
   Delete02Icon,
   Add01Icon,
-  Cancel01Icon,
+  Exchange01Icon,
+  RotateLeft01Icon,
 } from 'hugeicons-react';
 import { Pocket } from '../../types';
 import { useApp } from '../../context/AppContext';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatShortDate } from '../../utils/formatters';
 import { getTranslation, translations } from '../../utils/translations';
+import { confirmAndVoidTransaction } from '../../utils/voidTransactionHelper';
+import { BottomSheet } from '../ui/BottomSheet';
 import Swal from 'sweetalert2';
 
 interface PocketDetailModalProps {
@@ -19,6 +22,7 @@ interface PocketDetailModalProps {
   pocket: Pocket | null;
   onEdit: (pocket: Pocket) => void;
   onAllocate: (pocketId: string) => void;
+  onTransfer: (pocketId: string) => void;
 }
 
 export const PocketDetailModal: React.FC<PocketDetailModalProps> = ({
@@ -27,30 +31,35 @@ export const PocketDetailModal: React.FC<PocketDetailModalProps> = ({
   pocket,
   onEdit,
   onAllocate,
+  onTransfer,
 }) => {
-  const { state, deletePocket } = useApp();
+  const { state, deletePocket, voidTransaction } = useApp();
   const lang = state.settings.language;
 
-  if (!isOpen || !pocket) return null;
+  const livePocket = pocket ? state.pockets.find((p) => p.id === pocket.id) || pocket : null;
 
-  const pocketTransactions = state.transactions.filter(
-    (t) => t.pocketId === pocket.id && t.type === 'expense'
-  );
+  const pocketTransactions = livePocket
+    ? state.transactions.filter((t) => t.pocketId === livePocket.id && t.type === 'expense')
+    : [];
 
-  const totalExpense = pocketTransactions.reduce((sum, t) => sum + t.amount, 0);
+  const totalExpense = pocketTransactions
+    .filter((t) => !t.voided)
+    .reduce((sum, t) => sum + t.amount, 0);
 
-  const percentage = pocket.target > 0
-    ? Math.min(100, Math.round((pocket.balance / pocket.target) * 100))
-    : null;
+  const percentage =
+    livePocket && livePocket.target > 0
+      ? Math.min(100, Math.round((livePocket.balance / livePocket.target) * 100))
+      : null;
 
   const handleDelete = () => {
-    const formattedBalance = formatCurrency(pocket.balance);
-    const desc = pocket.balance > 0
-      ? translations[lang].confirmDeletePocketDescRefund(pocket.name, formattedBalance)
+    if (!livePocket) return;
+    const formattedBalance = formatCurrency(livePocket.balance);
+    const desc = livePocket.balance > 0
+      ? translations[lang].confirmDeletePocketDescRefund(livePocket.name, formattedBalance)
       : translations[lang].confirmDeletePocketDescEmpty;
 
     Swal.fire({
-      title: `${getTranslation(lang, 'confirmDeletePocketTitle')} (${pocket.name})`,
+      title: `${getTranslation(lang, 'confirmDeletePocketTitle')} (${livePocket.name})`,
       text: desc,
       icon: 'warning',
       showCancelButton: true,
@@ -60,7 +69,7 @@ export const PocketDetailModal: React.FC<PocketDetailModalProps> = ({
       cancelButtonText: getTranslation(lang, 'cancel'),
     }).then((result) => {
       if (result.isConfirmed) {
-        deletePocket(pocket.id);
+        deletePocket(livePocket.id);
         Swal.fire({
           toast: true,
           position: 'top-end',
@@ -75,46 +84,29 @@ export const PocketDetailModal: React.FC<PocketDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in-up font-sans">
-      <div className="relative w-full max-w-lg rounded-[32px] neu-flat border border-white/60 dark:border-white/5 p-6 sm:p-8 max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-200/60 dark:border-slate-800/60">
-          <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-2xl neu-pressed flex items-center justify-center text-sky-500">
-              <Wallet01Icon className="w-5 h-5" />
-            </span>
-            <div>
-              <h3 className="text-lg font-black text-slate-800 dark:text-white leading-tight">
-                {pocket.name}
-              </h3>
-              <p className="text-xs text-slate-400 font-semibold">
-                {getTranslation(lang, 'pocketDetail')}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-xl neu-button flex items-center justify-center text-slate-400 hover:text-slate-600 transition"
-          >
-            <Cancel01Icon className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Content Body */}
-        <div className="overflow-y-auto py-4 space-y-4 pr-1">
+    <BottomSheet
+      isOpen={isOpen && Boolean(livePocket)}
+      onClose={onClose}
+      title={livePocket?.name || ''}
+      subtitle={getTranslation(lang, 'pocketDetail')}
+      icon={<Wallet01Icon className="w-5 h-5" />}
+      iconColorClass="text-sky-500"
+    >
+      {livePocket && (
+        <div className="space-y-4">
           {/* Balance card */}
           <div className="p-5 rounded-2xl neu-pressed">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
               {getTranslation(lang, 'currentBalance')}
             </p>
             <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-              {formatCurrency(pocket.balance)}
+              {formatCurrency(livePocket.balance)}
             </p>
 
-            {pocket.target > 0 && (
+            {livePocket.target > 0 && (
               <div className="mt-4 pt-3 border-t border-slate-200/50 dark:border-slate-800/60">
                 <div className="flex justify-between text-xs font-bold mb-1.5 text-slate-600 dark:text-slate-300">
-                  <span>{getTranslation(lang, 'saveTarget')}: {formatCurrency(pocket.target)}</span>
+                  <span>{getTranslation(lang, 'saveTarget')}: {formatCurrency(livePocket.target)}</span>
                   <span className="text-sky-600 dark:text-sky-400 font-black">{percentage}%</span>
                 </div>
                 <div className="w-full h-2.5 rounded-full neu-flat overflow-hidden p-0.5">
@@ -128,13 +120,13 @@ export const PocketDetailModal: React.FC<PocketDetailModalProps> = ({
           </div>
 
           {/* Quick Actions */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 onClose();
-                onAllocate(pocket.id);
+                onAllocate(livePocket.id);
               }}
-              className="flex-1 py-3 px-3 rounded-2xl neu-button text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center gap-1.5 transition"
+              className="flex-1 py-3 px-2.5 rounded-2xl neu-button text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95"
             >
               <Add01Icon className="w-4 h-4" />
               <span>{getTranslation(lang, 'fillBalance')}</span>
@@ -142,16 +134,26 @@ export const PocketDetailModal: React.FC<PocketDetailModalProps> = ({
             <button
               onClick={() => {
                 onClose();
-                onEdit(pocket);
+                onTransfer(livePocket.id);
               }}
-              className="py-3 px-4 rounded-2xl neu-button text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition"
+              className="flex-1 py-3 px-2.5 rounded-2xl neu-button text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95"
+            >
+              <Exchange01Icon className="w-4 h-4" />
+              <span>{getTranslation(lang, 'transfer')}</span>
+            </button>
+            <button
+              onClick={() => {
+                onClose();
+                onEdit(livePocket);
+              }}
+              className="py-3 px-3 rounded-2xl neu-button text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center transition active:scale-95"
+              title={getTranslation(lang, 'editPocket')}
             >
               <Edit02Icon className="w-4 h-4" />
-              <span>{getTranslation(lang, 'editPocket')}</span>
             </button>
             <button
               onClick={handleDelete}
-              className="py-3 px-4 rounded-2xl neu-button text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center gap-1.5 transition"
+              className="py-3 px-3 rounded-2xl neu-button text-red-600 dark:text-red-400 font-bold text-xs flex items-center justify-center transition active:scale-95"
               title={getTranslation(lang, 'delete')}
             >
               <Delete02Icon className="w-4 h-4" />
@@ -170,49 +172,82 @@ export const PocketDetailModal: React.FC<PocketDetailModalProps> = ({
             </div>
 
             {pocketTransactions.length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center font-medium">
-                {getTranslation(lang, 'noExpensesInPocket')}
-              </p>
+              <div className="rounded-2xl neu-pressed py-6 px-4 text-center">
+                <p className="text-xs text-slate-400 font-medium">
+                  {getTranslation(lang, 'noExpensesInPocket')}
+                </p>
+              </div>
             ) : (
-              <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                {pocketTransactions.map((tx) => (
-                  <div
-                    key={tx.id}
-                    className="p-3 rounded-2xl neu-flat-sm flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl neu-pressed flex items-center justify-center text-red-500">
-                        <ArrowDownLeft01Icon className="w-3.5 h-3.5" />
+              <div className="rounded-2xl neu-pressed overflow-hidden">
+                <div className="max-h-56 overflow-y-auto divide-y divide-slate-200/50 dark:divide-slate-800/60">
+                  {pocketTransactions.map((tx) => (
+                    <div
+                      key={tx.id}
+                      className={`px-3.5 py-3 flex items-center justify-between gap-2.5 ${
+                        tx.voided ? 'opacity-60' : ''
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`w-8 h-8 rounded-xl neu-flat-sm flex items-center justify-center flex-shrink-0 ${
+                            tx.voided ? 'text-slate-400' : 'text-red-500'
+                          }`}
+                        >
+                          <ArrowDownLeft01Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p
+                              className={`text-xs font-bold break-words ${
+                                tx.voided
+                                  ? 'line-through text-slate-400 dark:text-slate-500'
+                                  : 'text-slate-800 dark:text-white'
+                              }`}
+                            >
+                              {tx.description}
+                            </p>
+                            {tx.voided && (
+                              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full neu-flat-sm text-amber-600 dark:text-amber-400">
+                                {getTranslation(lang, 'voidedBadge')}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-400 font-medium">
+                            {formatShortDate(tx.date, lang)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 dark:text-white">
-                          {tx.description}
-                        </p>
-                        <p className="text-[10px] text-slate-400 font-medium">
-                          {formatDate(tx.date, lang)}
-                        </p>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span
+                          className={`text-xs font-black whitespace-nowrap ${
+                            tx.voided
+                              ? 'line-through text-slate-400 dark:text-slate-500'
+                              : 'text-red-600 dark:text-red-400'
+                          }`}
+                        >
+                          -{formatCurrency(tx.amount)}
+                        </span>
+                        {!tx.voided && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              confirmAndVoidTransaction(tx, state.pockets, lang, voidTransaction)
+                            }
+                            className="w-7 h-7 rounded-xl neu-button flex items-center justify-center text-amber-500 hover:text-amber-600 transition active:scale-95"
+                            title={getTranslation(lang, 'voidTx')}
+                          >
+                            <RotateLeft01Icon className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <span className="text-xs font-black text-red-600 dark:text-red-400">
-                      -{formatCurrency(tx.amount)}
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="pt-3 border-t border-slate-200/60 dark:border-slate-800/60 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 rounded-2xl text-xs font-bold text-slate-600 dark:text-slate-300 neu-button"
-          >
-            {getTranslation(lang, 'close')}
-          </button>
-        </div>
-      </div>
-    </div>
+      )}
+    </BottomSheet>
   );
 };
